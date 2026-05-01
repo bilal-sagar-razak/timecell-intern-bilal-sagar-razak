@@ -6,7 +6,7 @@ per-task README.
 ## Tasks
 
 - [Task 1 — Portfolio Risk Calculator](task1_risk/README.md)
-- Task 2 — Live Market Data Fetch (TBD)
+- [Task 2 — Live Market Data Fetch](task2_market/README.md)
 - Task 3 — AI-Powered Portfolio Explainer (TBD)
 - Task 4 — Open (TBD)
 
@@ -14,7 +14,7 @@ per-task README.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt   # currently empty; populated by tasks 2 and 3
+pip install -r requirements.txt   # task2 deps now; task3 will add LLM SDK
 ```
 
 ## AI tooling
