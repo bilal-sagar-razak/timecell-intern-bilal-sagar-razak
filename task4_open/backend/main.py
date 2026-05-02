@@ -34,11 +34,13 @@ from metrics.compute import (
     kpis,
     xirr_by_fund,
 )
+from parser.cache import cache_key, read_cache, write_cache
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 MAX_FILE_BYTES = 10 * 1024 * 1024
+PROMPT_TEXT = (Path(__file__).parent / "prompts" / "normalize.txt").read_text()
 SUPPORTED_EXTENSIONS = {".xlsx", ".xls", ".pdf", ".png", ".jpg", ".jpeg"}
 
 app = FastAPI(title="Task 4a — Portfolio Intelligence Dashboard backend")
@@ -51,6 +53,7 @@ class ParseAndComputeResponse(BaseModel):
     allocation: list[AllocationSlice]
     xirr_by_fund: list[XirrEntry]
     category_performance: list[CategoryPerformance]
+    cached: bool = False
 
 
 @app.get("/api/health")
@@ -64,7 +67,10 @@ def health() -> dict:
 
 
 @app.post("/api/parse-and-compute", response_model=ParseAndComputeResponse)
-async def parse_and_compute(file: UploadFile = File(...)) -> ParseAndComputeResponse:
+async def parse_and_compute(
+    file: UploadFile = File(...),
+    force: bool = False,
+) -> ParseAndComputeResponse:
     """Accept a holdings file, extract + normalize via LLM, return KPIs/charts."""
     if not file.filename:
         raise HTTPException(status_code=400, detail={"error": "no file provided"})
@@ -79,6 +85,7 @@ async def parse_and_compute(file: UploadFile = File(...)) -> ParseAndComputeResp
             },
         )
 
+    file_bytes = bytearray()
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     tmp_path = Path(tmp.name)
     bytes_written = 0
@@ -96,6 +103,7 @@ async def parse_and_compute(file: UploadFile = File(...)) -> ParseAndComputeResp
                     },
                 )
             tmp.write(chunk)
+            file_bytes.extend(chunk)
         tmp.close()
     except HTTPException:
         raise
@@ -103,6 +111,15 @@ async def parse_and_compute(file: UploadFile = File(...)) -> ParseAndComputeResp
         tmp.close()
         tmp_path.unlink(missing_ok=True)
         raise
+
+    key = cache_key(bytes(file_bytes), PROMPT_TEXT)
+    if not force:
+        cached = read_cache(key)
+        if cached is not None:
+            logger.info("[parser] cache HIT for %s... — $0", key[:8])
+            tmp_path.unlink(missing_ok=True)
+            cached["cached"] = True
+            return ParseAndComputeResponse(**cached)
 
     try:
         try:
@@ -141,12 +158,18 @@ async def parse_and_compute(file: UploadFile = File(...)) -> ParseAndComputeResp
         _allocation = allocation(normalized)
         _xirr = xirr_by_fund(normalized)
         _cat_perf = category_performance(normalized)
-        return ParseAndComputeResponse(
+        response = ParseAndComputeResponse(
             normalized=normalized,
             kpis=_kpis,
             allocation=_allocation,
             xirr_by_fund=_xirr,
             category_performance=_cat_perf,
+            cached=False,
         )
+        try:
+            write_cache(key, response.model_dump(mode="json"))
+        except OSError as e:
+            logger.warning("[cache] write failed for %s...: %s", key[:8], e)
+        return response
     finally:
         tmp_path.unlink(missing_ok=True)

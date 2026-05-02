@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -15,7 +16,14 @@ from parser.schema import Asset, NormalizedHoldings, PortfolioSummary
 
 client = TestClient(app)
 
-SAMPLE_XLSX = Path(__file__).parent.parent / "samples" / "sample_groww.xlsx"
+
+@pytest.fixture(autouse=True)
+def _isolate_parse_cache(tmp_path_factory, monkeypatch):
+    """Redirect parse-cache to a per-test tempdir so tests never touch the user's real cache."""
+    monkeypatch.setattr("parser.cache.PARSE_CACHE_DIR", tmp_path_factory.mktemp("parse-cache"))
+
+SAMPLE_DIR = Path(__file__).parent.parent / "samples"
+SAMPLE_XLSX = SAMPLE_DIR / "sample_groww.xlsx"
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
@@ -137,3 +145,68 @@ def test_parse_and_compute_handles_budget_exhausted() -> None:
     assert resp.status_code == 429
     body = resp.json()
     assert "budget" in body["detail"]["error"]
+
+
+def test_parse_and_compute_cache_hit_skips_normalize(tmp_path, monkeypatch) -> None:
+    """Two requests with the same file body → normalize called only once."""
+    monkeypatch.setattr("parser.cache.PARSE_CACHE_DIR", tmp_path)
+    fake = _fake_normalized()
+    with patch("main.normalize", return_value=fake) as mock_norm:
+        with open(SAMPLE_DIR / "sample_groww.xlsx", "rb") as f:
+            r1 = client.post(
+                "/api/parse-and-compute",
+                files={"file": ("sample_groww.xlsx", f,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+        with open(SAMPLE_DIR / "sample_groww.xlsx", "rb") as f:
+            r2 = client.post(
+                "/api/parse-and-compute",
+                files={"file": ("sample_groww.xlsx", f,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+    assert r1.status_code == 200
+    assert r2.status_code == 200
+    assert r1.json()["cached"] is False, "first call should be a miss"
+    assert r2.json()["cached"] is True, "second call should be a hit"
+    assert mock_norm.call_count == 1, \
+        f"normalize should run once across two same-file requests, got {mock_norm.call_count}"
+
+
+def test_parse_and_compute_force_bypasses_cache(tmp_path, monkeypatch) -> None:
+    """?force=true skips lookup and re-runs normalize."""
+    monkeypatch.setattr("parser.cache.PARSE_CACHE_DIR", tmp_path)
+    fake = _fake_normalized()
+    with patch("main.normalize", return_value=fake) as mock_norm:
+        with open(SAMPLE_DIR / "sample_groww.xlsx", "rb") as f:
+            client.post(
+                "/api/parse-and-compute",
+                files={"file": ("sample_groww.xlsx", f,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+        with open(SAMPLE_DIR / "sample_groww.xlsx", "rb") as f:
+            r2 = client.post(
+                "/api/parse-and-compute?force=true",
+                files={"file": ("sample_groww.xlsx", f,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+    assert r2.status_code == 200
+    assert r2.json()["cached"] is False, "force=true must produce a fresh response"
+    assert mock_norm.call_count == 2, \
+        f"normalize must run on both calls when second uses force, got {mock_norm.call_count}"
+
+
+def test_parse_and_compute_does_not_cache_on_error(tmp_path, monkeypatch) -> None:
+    """NormalizationError → 502 → no file written under PARSE_CACHE_DIR."""
+    from parser.normalize import NormalizationError
+    monkeypatch.setattr("parser.cache.PARSE_CACHE_DIR", tmp_path)
+    err = NormalizationError("boom", attempts=["x", "y"], errors=["e1", "e2"])
+    with patch("main.normalize", side_effect=err):
+        with open(SAMPLE_DIR / "sample_groww.xlsx", "rb") as f:
+            r = client.post(
+                "/api/parse-and-compute",
+                files={"file": ("sample_groww.xlsx", f,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+    assert r.status_code == 502
+    cache_files = list(tmp_path.iterdir())
+    assert cache_files == [], f"no cache should be written on error, got {cache_files}"
