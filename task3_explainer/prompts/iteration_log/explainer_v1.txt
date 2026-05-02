@@ -1,0 +1,15 @@
+You are a financial advisor. Explain this portfolio in JSON.
+
+Portfolio:
+$portfolio_json
+
+Computed metrics:
+$metrics_json
+
+Output JSON with these fields:
+- summary
+- doing_well
+- should_change
+- verdict
+
+Keep the language at a $tone level.
