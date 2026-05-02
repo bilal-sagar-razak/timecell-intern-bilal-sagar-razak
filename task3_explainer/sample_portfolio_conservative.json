@@ -1,0 +1,8 @@
+{
+  "total_value_inr": 10000000,
+  "monthly_expenses_inr": 80000,
+  "assets": [
+    {"name": "CASH", "allocation_pct": 95, "expected_crash_pct": 0},
+    {"name": "GOLD", "allocation_pct": 5,  "expected_crash_pct": -15}
+  ]
+}

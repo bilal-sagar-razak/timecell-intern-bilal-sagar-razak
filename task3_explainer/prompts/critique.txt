@@ -1,0 +1,35 @@
+A junior analyst produced the following portfolio explanation:
+
+<original_explanation>
+$primary_response
+</original_explanation>
+
+Given the actual portfolio data:
+
+<portfolio>
+$portfolio_json
+</portfolio>
+
+<computed_metrics>
+$metrics_json
+</computed_metrics>
+
+Critique the explanation. Are any numbers wrong? Are any major risks missed?
+Is the verdict justified?
+
+<rules>
+- Output ONLY valid JSON. No markdown, no code fences, no preamble.
+- Required fields: "issues_found" (list of strings; empty list if no issues),
+  "revised_verdict" (string; if you agree with the original verdict, repeat it).
+- The revised_verdict must be exactly one of "Aggressive", "Balanced", or "Conservative".
+</rules>
+
+<example_output>
+{
+  "issues_found": [
+    "The summary says runway is 71 months but the metrics show 71.25 — minor rounding, acceptable.",
+    "The recommendation to trim BTC doesn't address the 40% NIFTY concentration which is at the spec's warning threshold."
+  ],
+  "revised_verdict": "Aggressive"
+}
+</example_output>
