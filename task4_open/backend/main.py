@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -47,6 +48,14 @@ PROMPT_TEXT = (Path(__file__).parent / "prompts" / "normalize.txt").read_text()
 SUPPORTED_EXTENSIONS = {".xlsx", ".xls", ".pdf", ".png", ".jpg", ".jpeg"}
 
 app = FastAPI(title="Task 4a — Portfolio Intelligence Dashboard backend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ParseAndComputeResponse(BaseModel):

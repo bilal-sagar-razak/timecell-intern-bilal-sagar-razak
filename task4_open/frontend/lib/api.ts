@@ -149,6 +149,11 @@ export async function parseAndCompute(
   return r.json()
 }
 
+/** Long-running endpoints (e.g., the Sonnet agent) bypass the Next.js dev proxy
+ * (which times out around 30s and returns ECONNRESET) by hitting the backend directly. */
+const DIRECT_BACKEND =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
+
 async function _postJson<T>(url: string, body: unknown): Promise<T> {
   const r = await fetch(url, {
     method: "POST",
@@ -179,5 +184,5 @@ export function fetchMarketSnapshot(
 export function runRebalance(
   holdings: NormalizedHoldings,
 ): Promise<RebalanceResult> {
-  return _postJson<RebalanceResult>("/api/rebalance", { holdings })
+  return _postJson<RebalanceResult>(`${DIRECT_BACKEND}/api/rebalance`, { holdings })
 }

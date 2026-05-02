@@ -75,12 +75,39 @@ def test_get_nifty_trend_invalid_period():
     assert "error" in result
 
 
-def test_get_news_for_holding_filters_by_substring():
+def test_get_news_for_holding_matches_by_name():
     from agent.tools import get_news_for_holding
     result = get_news_for_holding.func(name="Reliance")
-    assert result["name"] == "Reliance"
+    assert result["matched_by"] == "name"
     assert len(result["headlines"]) == 1
-    assert "Reliance" in result["headlines"][0]["title"]
+
+
+def test_get_news_for_holding_falls_back_to_sub_category():
+    """When a fund name returns no headlines but its sub_category does, return those."""
+    from agent import tools
+    from market.schema import Headline
+    from datetime import datetime, timezone
+
+    snap = tools._ctx["snapshot"]
+    snap.news.insert(0, Headline(
+        title="Gilt funds rally as bond yields drop", publisher="X",
+        url="https://x/gilt", published_at=datetime.now(timezone.utc),
+    ))
+    holdings = tools._ctx["holdings"]
+    asset = next(a for a in holdings.assets if a.name == "ICICI Pru Gilt Fund")
+    object.__setattr__(asset, "sub_category", "Gilt")
+
+    result = tools.get_news_for_holding.func(name="ICICI Pru Gilt Fund")
+    assert result["matched_by"] == "sub_category"
+    assert result["query"] == "Gilt"
+    assert any("Gilt" in h["title"] for h in result["headlines"])
+
+
+def test_get_news_for_holding_returns_matched_by_none_when_nothing_relevant():
+    from agent.tools import get_news_for_holding
+    result = get_news_for_holding.func(name="ICICI Pru Gilt Fund")
+    assert result["matched_by"] == "none"
+    assert result["headlines"] == []
 
 
 def test_compute_concentration_flags_over_threshold_and_categories():

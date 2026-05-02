@@ -83,7 +83,7 @@ test("marketSnapshot is session-only and not in partialize", () => {
 })
 
 
-test("rebalanceResult is session-only and not in partialize", () => {
+test("rebalanceResult is persisted (so a refresh doesn't waste credits)", () => {
   const r: RebalanceResult = {
     advice_markdown: "1. Test", trace: [], iterations: 1, truncated: false, cost_usd: 0.01,
   }
@@ -91,5 +91,5 @@ test("rebalanceResult is session-only and not in partialize", () => {
   usePortfolio.getState().setRebalanceResult(r)
   expect(usePortfolio.getState().rebalanceResult).toEqual(r)
   const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
-  expect(persisted.state.rebalanceResult).toBeUndefined()
+  expect(persisted.state.rebalanceResult).toEqual(r)
 })

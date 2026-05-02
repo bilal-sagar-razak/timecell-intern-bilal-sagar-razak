@@ -30,25 +30,49 @@ def get_nifty_trend(period_days: int = 90) -> dict:
     }
 
 
+def _serialize_headlines(headlines) -> list[dict]:
+    return [
+        {
+            "title": h.title,
+            "publisher": h.publisher,
+            "url": h.url,
+            "published_at": h.published_at.isoformat(),
+            "snippet": h.snippet,
+        }
+        for h in headlines
+    ]
+
+
+def _match_substr(news, needle: str, limit: int = 5):
+    n = needle.lower()
+    return [h for h in news if n and n in h.title.lower()][:limit]
+
+
 @beta_tool
 def get_news_for_holding(name: str) -> dict:
-    """Return up to 5 news headlines whose title contains the holding name (case-insensitive)."""
+    """News for a holding. Falls back to its sub_category then category when the fund name itself
+    returns no headlines (mutual funds rarely appear by name in market news)."""
     snap = _ctx["snapshot"]
-    needle = name.lower()
-    matches = [h for h in snap.news if needle in h.title.lower()][:5]
-    return {
-        "name": name,
-        "headlines": [
-            {
-                "title": h.title,
-                "publisher": h.publisher,
-                "url": h.url,
-                "published_at": h.published_at.isoformat(),
-                "snippet": h.snippet,
-            }
-            for h in matches
-        ],
-    }
+    holdings = _ctx["holdings"]
+    asset = next((a for a in holdings.assets if a.name.lower() == name.lower()), None)
+
+    by_name = _match_substr(snap.news, name)
+    if by_name:
+        return {"name": name, "matched_by": "name", "query": name, "headlines": _serialize_headlines(by_name)}
+
+    if asset and asset.sub_category:
+        sub = asset.sub_category
+        by_sub = _match_substr(snap.news, sub)
+        if by_sub:
+            return {"name": name, "matched_by": "sub_category", "query": sub, "headlines": _serialize_headlines(by_sub)}
+
+    if asset and asset.category:
+        cat = asset.category
+        by_cat = _match_substr(snap.news, cat)
+        if by_cat:
+            return {"name": name, "matched_by": "category", "query": cat, "headlines": _serialize_headlines(by_cat)}
+
+    return {"name": name, "matched_by": "none", "query": name, "headlines": []}
 
 
 @beta_tool

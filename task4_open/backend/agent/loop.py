@@ -1,6 +1,9 @@
 """Anthropic Sonnet tool-use loop driving the rebalance agent."""
 from __future__ import annotations
 
+import functools
+import inspect
+import json
 import logging
 import time
 from datetime import datetime, timezone
@@ -82,28 +85,28 @@ def _instrument_tools(trace_list: list[dict], original_tools):
         original_name = original.name
 
         def make_wrapper(fn, nm):
-            def wrapper(**kwargs) -> dict:
+            @functools.wraps(fn)
+            def wrapper(*args, **kwargs):
                 started = time.time()
                 ts = datetime.now(timezone.utc)
+                bound = inspect.signature(fn).bind_partial(*args, **kwargs)
+                input_json = dict(bound.arguments)
                 out: dict = {}
                 try:
-                    out = fn(**kwargs)
-                    return out
+                    out = fn(*args, **kwargs)
+                    return json.dumps(out)
                 except Exception as e:
                     out = {"error": str(e)}
                     raise
                 finally:
                     trace_list.append({
                         "tool_name": nm,
-                        "input_json": kwargs,
+                        "input_json": input_json,
                         "output_json": out if isinstance(out, dict) else {"value": out},
                         "ts": ts,
                         "duration_ms": int((time.time() - started) * 1000),
                     })
 
-            wrapper.__name__ = nm
-            wrapper.__doc__ = fn.__doc__
-            wrapper.__annotations__ = fn.__annotations__
             return wrapper
 
         wrapped.append(beta_tool(make_wrapper(original_func, original_name)))

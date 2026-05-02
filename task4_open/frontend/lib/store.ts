@@ -41,7 +41,7 @@ export const usePortfolio = create<PortfolioState>()(
     {
       name: "timecell-portfolio-v1",
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ data: s.data }),
+      partialize: (s) => ({ data: s.data, rebalanceResult: s.rebalanceResult }),
     },
   ),
 )
