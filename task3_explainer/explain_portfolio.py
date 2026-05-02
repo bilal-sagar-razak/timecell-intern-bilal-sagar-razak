@@ -146,6 +146,58 @@ def parse_critique_response(raw: str) -> dict:
     return parsed
 
 
+def _format_inr(amount: float) -> str:
+    """Format a number with Indian-style commas (lakh/crore grouping). 10000000 -> '1,00,00,000'."""
+    n = int(round(amount))
+    sign = "-" if n < 0 else ""
+    s = str(abs(n))
+    if len(s) <= 3:
+        return f"{sign}{s}"
+    head, tail = s[:-3], s[-3:]
+    groups = []
+    while len(head) > 2:
+        groups.insert(0, head[-2:])
+        head = head[:-2]
+    if head:
+        groups.insert(0, head)
+    return f"{sign}{','.join(groups)},{tail}"
+
+
+def format_portfolio_summary(portfolio: dict) -> str:
+    """Render the portfolio constituents as a nicely aligned table."""
+    sep = "═" * 60
+    total = portfolio["total_value_inr"]
+    expenses = portfolio["monthly_expenses_inr"]
+    assets = portfolio["assets"]
+
+    name_w = max(6, max(len(a["name"]) for a in assets))
+    rows = [
+        f"{'Asset':<{name_w}}  {'Allocation':>10}  {'Crash':>8}  {'Value (INR)':>14}",
+        f"{'-' * name_w}  {'-' * 10}  {'-' * 8}  {'-' * 14}",
+    ]
+    alloc_total = 0
+    for a in assets:
+        alloc = a["allocation_pct"]
+        crash = a["expected_crash_pct"]
+        value = total * alloc / 100
+        rows.append(
+            f"{a['name']:<{name_w}}  {alloc:>9}%  {crash:>7}%  ₹{_format_inr(value):>13}"
+        )
+        alloc_total += alloc
+    rows.append(f"{'-' * name_w}  {'-' * 10}  {'-' * 8}  {'-' * 14}")
+    rows.append(f"{'Total':<{name_w}}  {alloc_total:>9}%")
+
+    return "\n".join([
+        sep,
+        "PORTFOLIO",
+        sep,
+        f"Total value:       ₹{_format_inr(total)}",
+        f"Monthly expenses:  ₹{_format_inr(expenses)}",
+        "",
+        *rows,
+    ])
+
+
 def format_output(parsed: dict) -> str:
     """Pretty-print the (possibly-refined) explanation. Critique never appears here."""
     sep = "═" * 60
@@ -298,7 +350,10 @@ def main() -> None:
                 exc_info=True,
             )
 
-    # Output: ONLY the final (possibly-refined) explanation
+    # Output: portfolio constituents first (so the explanation has context),
+    # then the raw LLM response, then the parsed user-facing output.
+    print(format_portfolio_summary(portfolio))
+    print()
     sep = "═" * 60
     print(sep)
     print("RAW LLM RESPONSE")

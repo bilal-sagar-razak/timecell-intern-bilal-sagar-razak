@@ -14,6 +14,8 @@ from explain_portfolio import (
     parse_response,
     parse_critique_response,
     format_output,
+    format_portfolio_summary,
+    _format_inr,
 )
 
 
@@ -117,6 +119,32 @@ def test_format_output_no_critique_section() -> None:
         "critique should never appear in user-facing output (per redesign)"
 
 
+def test_format_inr_indian_grouping() -> None:
+    assert _format_inr(10000000) == "1,00,00,000", f"got {_format_inr(10000000)!r}"
+    assert _format_inr(80000) == "80,000", f"got {_format_inr(80000)!r}"
+    assert _format_inr(500) == "500", f"got {_format_inr(500)!r}"
+
+
+def test_format_portfolio_summary_shows_all_assets() -> None:
+    portfolio = {
+        "total_value_inr": 10000000,
+        "monthly_expenses_inr": 80000,
+        "assets": [
+            {"name": "BTC",     "allocation_pct": 30, "expected_crash_pct": -80},
+            {"name": "NIFTY50", "allocation_pct": 40, "expected_crash_pct": -40},
+            {"name": "GOLD",    "allocation_pct": 20, "expected_crash_pct": -15},
+            {"name": "CASH",    "allocation_pct": 10, "expected_crash_pct": 0},
+        ],
+    }
+    out = format_portfolio_summary(portfolio)
+    assert "PORTFOLIO" in out, "missing PORTFOLIO header"
+    assert "1,00,00,000" in out, "total value (Indian-grouped) missing"
+    assert "80,000" in out, "monthly expenses missing"
+    for name in ("BTC", "NIFTY50", "GOLD", "CASH"):
+        assert name in out, f"asset {name} missing from summary"
+    assert "Total" in out and "100%" in out, "allocation total row missing"
+
+
 if __name__ == "__main__":
     test_load_portfolio_valid_file()
     test_load_portfolio_missing_file()
@@ -126,4 +154,6 @@ if __name__ == "__main__":
     test_parse_response_rejects_bad_verdict()
     test_parse_critique_response_validates_revised_verdict()
     test_format_output_no_critique_section()
+    test_format_inr_indian_grouping()
+    test_format_portfolio_summary_shows_all_assets()
     print("All tests passed")
