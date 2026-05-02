@@ -315,7 +315,7 @@ def main() -> None:
     parsed_v1 = parse_response(raw_v1)
 
     # Refinement loop (gated on OpenAI availability, fail-quiet on errors)
-    final_raw, final_parsed = raw_v1, parsed_v1
+    final_parsed = parsed_v1
     if have_openai:
         critique_prompt = build_critique_prompt(portfolio, metrics, raw_v1)
         try:
@@ -334,8 +334,7 @@ def main() -> None:
                         portfolio, metrics, raw_v1, critique, args.tone,
                     )
                     raw_v2 = call_llm(refine_prompt, args.model)
-                    parsed_v2 = parse_response(raw_v2)
-                    final_raw, final_parsed = raw_v2, parsed_v2
+                    final_parsed = parse_response(raw_v2)
                     logging.info("explanation refined using critique feedback")
                 except Exception as e:
                     logging.warning(
@@ -351,14 +350,9 @@ def main() -> None:
             )
 
     # Output: portfolio constituents first (so the explanation has context),
-    # then the raw LLM response, then the parsed user-facing output.
+    # then the parsed user-facing output. Raw LLM response is intentionally
+    # not displayed — the user sees only the finished output.
     print(format_portfolio_summary(portfolio))
-    print()
-    sep = "═" * 60
-    print(sep)
-    print("RAW LLM RESPONSE")
-    print(sep)
-    print(final_raw)
     print()
     print(format_output(final_parsed))
 
