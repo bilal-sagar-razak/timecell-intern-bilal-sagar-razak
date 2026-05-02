@@ -3,3 +3,4 @@ __pycache__/
 .env
 *.pyc
 task2_market/.price_cache*
+.DS_Store
