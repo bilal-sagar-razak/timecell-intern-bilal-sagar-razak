@@ -37,6 +37,7 @@ from metrics.compute import (
 from parser.cache import cache_key, read_cache, write_cache
 from market.cache import get_market_snapshot
 from market.schema import MarketSnapshot
+from agent.loop import RebalanceResult, run_rebalance
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -62,6 +63,11 @@ class MarketRequest(BaseModel):
     """Request body for /api/market — holdings JSON + optional refresh."""
     holdings: NormalizedHoldings
     refresh: bool = False
+
+
+class RebalanceRequest(BaseModel):
+    """Request body for /api/rebalance — just the holdings (snapshot fetched server-side)."""
+    holdings: NormalizedHoldings
 
 
 @app.get("/api/health")
@@ -193,4 +199,30 @@ def market(req: MarketRequest) -> MarketSnapshot:
         raise HTTPException(
             status_code=502,
             detail={"error": "market data unavailable", "detail": str(e)},
+        )
+
+
+@app.post("/api/rebalance", response_model=RebalanceResult)
+def rebalance(req: RebalanceRequest) -> RebalanceResult:
+    """Run the Sonnet rebalance agent against the holdings + current market snapshot."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail={"error": "rebalance unavailable", "detail": "ANTHROPIC_API_KEY not set"},
+        )
+    snapshot = get_market_snapshot(req.holdings, refresh=False)
+    try:
+        return run_rebalance(req.holdings, snapshot)
+    except BudgetExhausted as e:
+        raise HTTPException(
+            status_code=429,
+            detail={"error": "daily LLM budget exhausted", "detail": str(e)},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("rebalance failed")
+        raise HTTPException(
+            status_code=502,
+            detail={"error": "rebalance failed", "detail": str(e)},
         )

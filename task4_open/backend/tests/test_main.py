@@ -253,3 +253,44 @@ def test_market_endpoint_yfinance_failure_returns_502(monkeypatch):
     r = client.post("/api/market", json={"holdings": holdings.model_dump(mode="json")})
     assert r.status_code == 502
     assert "market data unavailable" in r.json()["detail"]["error"]
+
+
+def test_rebalance_endpoint_happy_path(monkeypatch):
+    from agent.loop import RebalanceResult
+    holdings = _fake_normalized()
+    fake_result = RebalanceResult(
+        advice_markdown="1. Test advice — Evidence: foo.",
+        trace=[], iterations=2, truncated=False, cost_usd=0.05,
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setattr("main.get_market_snapshot", lambda h, refresh=False: _fake_market_snapshot())
+    monkeypatch.setattr("main.run_rebalance", lambda h, s: fake_result)
+    r = client.post("/api/rebalance", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 200
+    body = r.json()
+    assert "Test advice" in body["advice_markdown"]
+    assert body["iterations"] == 2
+    assert body["cost_usd"] == 0.05
+
+
+def test_rebalance_endpoint_no_api_key_returns_503(monkeypatch):
+    holdings = _fake_normalized()
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    r = client.post("/api/rebalance", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 503
+    assert "rebalance unavailable" in r.json()["detail"]["error"]
+
+
+def test_rebalance_endpoint_budget_exhausted_returns_429(monkeypatch):
+    from parser.normalize import BudgetExhausted
+    holdings = _fake_normalized()
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setattr("main.get_market_snapshot", lambda h, refresh=False: _fake_market_snapshot())
+
+    def raise_budget(h, s):
+        raise BudgetExhausted("daily budget $2.00 would be exceeded")
+
+    monkeypatch.setattr("main.run_rebalance", raise_budget)
+    r = client.post("/api/rebalance", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 429
+    assert "budget" in r.json()["detail"]["error"].lower()
