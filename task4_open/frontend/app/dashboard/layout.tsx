@@ -5,14 +5,14 @@ import Image from "next/image"
 import { toast } from "sonner"
 import { TabNav } from "@/components/TabNav"
 import { ApiError, parseAndCompute } from "@/lib/api"
-import { usePortfolio } from "@/lib/store"
+import { useHasHydrated, usePortfolio } from "@/lib/store"
 import { formatINR, formatPct } from "@/lib/format"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const data = usePortfolio((s) => s.data)
   const lastFile = usePortfolio((s) => s.lastFile)
-  const hasHydrated = usePortfolio((s) => s.hasHydrated)
+  const hasHydrated = useHasHydrated()
   const setData = usePortfolio((s) => s.setData)
   const clear = usePortfolio((s) => s.clear)
   const [reparsing, setReparsing] = useState(false)
