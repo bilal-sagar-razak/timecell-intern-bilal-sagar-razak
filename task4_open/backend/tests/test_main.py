@@ -210,3 +210,46 @@ def test_parse_and_compute_does_not_cache_on_error(tmp_path, monkeypatch) -> Non
     assert r.status_code == 502
     cache_files = list(tmp_path.iterdir())
     assert cache_files == [], f"no cache should be written on error, got {cache_files}"
+
+
+from datetime import date as _date_type, datetime as _dt, timezone as _tz
+
+
+def _fake_market_snapshot():
+    from market.schema import Headline, MarketSnapshot, NiftyPoint, NiftyTrend
+    return MarketSnapshot(
+        nifty_trend=NiftyTrend(
+            points=[NiftyPoint(date=_date_type(2026, 1, 1), close=22000.0),
+                    NiftyPoint(date=_date_type(2026, 1, 2), close=22100.0)],
+            pct_change_period=0.45, current=22100.0, period_days=2,
+        ),
+        news=[Headline(
+            title="Reliance up", publisher="X", url="https://x/x",
+            published_at=_dt(2026, 1, 2, tzinfo=_tz.utc),
+        )],
+        news_fallback_used=False,
+        cached_at=_dt(2026, 1, 2, tzinfo=_tz.utc),
+    )
+
+
+def test_market_endpoint_happy_path(monkeypatch):
+    holdings = _fake_normalized()
+    snap = _fake_market_snapshot()
+    monkeypatch.setattr("main.get_market_snapshot", lambda h, refresh=False: snap)
+    r = client.post("/api/market", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["nifty_trend"]["current"] == 22100.0
+    assert body["news"][0]["title"] == "Reliance up"
+
+
+def test_market_endpoint_yfinance_failure_returns_502(monkeypatch):
+    holdings = _fake_normalized()
+
+    def boom(h, refresh=False):
+        raise RuntimeError("yfinance returned empty Nifty history")
+
+    monkeypatch.setattr("main.get_market_snapshot", boom)
+    r = client.post("/api/market", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 502
+    assert "market data unavailable" in r.json()["detail"]["error"]

@@ -35,6 +35,8 @@ from metrics.compute import (
     xirr_by_fund,
 )
 from parser.cache import cache_key, read_cache, write_cache
+from market.cache import get_market_snapshot
+from market.schema import MarketSnapshot
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -54,6 +56,12 @@ class ParseAndComputeResponse(BaseModel):
     xirr_by_fund: list[XirrEntry]
     category_performance: list[CategoryPerformance]
     cached: bool = False
+
+
+class MarketRequest(BaseModel):
+    """Request body for /api/market — holdings JSON + optional refresh."""
+    holdings: NormalizedHoldings
+    refresh: bool = False
 
 
 @app.get("/api/health")
@@ -173,3 +181,16 @@ async def parse_and_compute(
         return response
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+@app.post("/api/market", response_model=MarketSnapshot)
+def market(req: MarketRequest) -> MarketSnapshot:
+    """Returns Nifty 50 trend + headlines filtered to the user's portfolio."""
+    try:
+        return get_market_snapshot(req.holdings, refresh=req.refresh)
+    except Exception as e:
+        logger.exception("market fetch failed")
+        raise HTTPException(
+            status_code=502,
+            detail={"error": "market data unavailable", "detail": str(e)},
+        )
