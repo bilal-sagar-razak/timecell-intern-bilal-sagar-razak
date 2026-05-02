@@ -7,7 +7,7 @@ per-task README.
 
 - [Task 1 — Portfolio Risk Calculator](task1_risk/README.md)
 - [Task 2 — Live Market Data Fetch](task2_market/README.md)
-- Task 3 — AI-Powered Portfolio Explainer (TBD)
+- [Task 3 — AI-Powered Portfolio Explainer](task3_explainer/README.md)
 - Task 4 — Open (TBD)
 
 ## Setup
