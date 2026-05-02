@@ -76,6 +76,7 @@ export interface ParseAndComputeResponse {
   allocation: AllocationSlice[]
   xirr_by_fund: XirrEntry[]
   category_performance: CategoryPerformance[]
+  cached: boolean
 }
 
 export class ApiError extends Error {
@@ -84,10 +85,16 @@ export class ApiError extends Error {
   }
 }
 
-export async function parseAndCompute(file: File): Promise<ParseAndComputeResponse> {
+export async function parseAndCompute(
+  file: File,
+  opts: { force?: boolean } = {},
+): Promise<ParseAndComputeResponse> {
   const fd = new FormData()
   fd.append("file", file)
-  const r = await fetch("/api/parse-and-compute", { method: "POST", body: fd })
+  const url = opts.force
+    ? "/api/parse-and-compute?force=true"
+    : "/api/parse-and-compute"
+  const r = await fetch(url, { method: "POST", body: fd })
   if (!r.ok) {
     let detail: unknown = null
     try {
