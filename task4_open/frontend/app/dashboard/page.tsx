@@ -61,6 +61,12 @@ export default function OverviewPage() {
                 pnlInr={`${c.pnl_inr >= 0 ? "+" : ""}₹${formatINR(Math.abs(c.pnl_inr))}`}
                 cagrPct={c.cagr_pct !== null ? formatPct(c.cagr_pct, true) : null}
                 isPositive={c.pnl_inr >= 0}
+                subBreakdowns={c.sub_breakdowns.map((b) => ({
+                  label: b.label,
+                  pnlInr: `${b.pnl_inr >= 0 ? "+" : ""}₹${formatINR(Math.abs(b.pnl_inr))}`,
+                  cagrPct: b.cagr_pct !== null ? formatPct(b.cagr_pct, true) : null,
+                  isPositive: b.pnl_inr >= 0,
+                }))}
               />
             ))}
           </div>

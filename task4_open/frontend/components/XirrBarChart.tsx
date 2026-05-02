@@ -11,7 +11,7 @@ export function XirrBarChart({ entries }: XirrBarChartProps) {
   return (
     <div className="border border-rule bg-rule-soft/30 p-5">
       <div className="mb-3 font-mono text-[0.7rem] uppercase tracking-[0.22em] text-muted-deep">
-        XIRR by Fund
+        Return by Fund
       </div>
       <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">

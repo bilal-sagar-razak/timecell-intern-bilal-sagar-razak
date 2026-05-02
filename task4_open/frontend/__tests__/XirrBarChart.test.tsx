@@ -5,7 +5,7 @@ import { XirrBarChart } from "@/components/XirrBarChart"
 describe("XirrBarChart", () => {
   test("renders header", () => {
     render(<XirrBarChart entries={[{ name: "PPFCF", xirr_pct: 10.22, color: "positive" }]} />)
-    expect(screen.getByText("XIRR by Fund")).toBeInTheDocument()
+    expect(screen.getByText("Return by Fund")).toBeInTheDocument()
   })
   test("includes each fund name", () => {
     render(
