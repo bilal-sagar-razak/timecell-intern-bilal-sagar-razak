@@ -97,11 +97,21 @@ def test_xirr_by_fund_sorted_desc_with_color() -> None:
         _asset("No XIRR Fund", "Equity", "Small Cap", current=100, invested=100, xirr=None),
     ])
     entries = xirr_by_fund(nh)
-    assert len(entries) == 3, f"None-XIRR should be skipped, got {len(entries)}"
+    assert len(entries) == 4, f"all assets should appear via pnl_pct fallback, got {len(entries)}"
     assert entries[0].name == "Top Fund"
     assert entries[0].color == "positive"
     assert entries[-1].name == "Negative Fund"
     assert entries[-1].color == "negative"
+
+
+def test_xirr_by_fund_falls_back_to_pnl_pct() -> None:
+    nh = _portfolio([
+        _asset("Zerodha Fund", "Equity", "Small Cap", current=120, invested=100, xirr=None),
+    ])
+    entries = xirr_by_fund(nh)
+    assert len(entries) == 1
+    assert entries[0].xirr_pct == 20.0, f"expected pnl_pct fallback (20.0), got {entries[0].xirr_pct}"
+    assert entries[0].color == "positive"
 
 
 def test_xirr_by_fund_truncates_long_names() -> None:
@@ -126,3 +136,36 @@ def test_category_performance_aggregates() -> None:
     assert by_cat["Debt"].pnl_inr == 50.0
     assert by_cat["Equity"].cagr_pct == 5.0
     assert by_cat["Debt"].cagr_pct == 5.0
+
+
+def test_category_performance_includes_sub_breakdowns() -> None:
+    nh = _portfolio([
+        _asset("Fund A", "Equity", "Flexi Cap", current=500, invested=400, xirr=10.0),
+        _asset("Fund B", "Equity", "Mid Cap", current=290, invested=300, xirr=-2.0),
+        _asset("Fund C", "Equity", "Flexi Cap", current=220, invested=200, xirr=8.0),
+        _asset("Fund D", "Debt", "Gilt", current=400, invested=350, xirr=5.0),
+    ])
+    perf = category_performance(nh)
+    by_cat = {p.category: p for p in perf}
+
+    eq_subs = {b.label: b for b in by_cat["Equity"].sub_breakdowns}
+    assert "Flexi Cap" in eq_subs
+    assert "Mid Cap" in eq_subs
+    assert eq_subs["Flexi Cap"].pnl_inr == 120.0, f"got {eq_subs['Flexi Cap'].pnl_inr}"
+    assert eq_subs["Flexi Cap"].cagr_pct == 9.0
+    assert eq_subs["Mid Cap"].pnl_inr == -10.0
+    assert eq_subs["Mid Cap"].cagr_pct == -2.0
+
+    debt_subs = by_cat["Debt"].sub_breakdowns
+    assert len(debt_subs) == 1
+    assert debt_subs[0].label == "Gilt"
+    assert debt_subs[0].pnl_inr == 50.0
+
+
+def test_category_performance_falls_back_to_pnl_pct_for_cagr() -> None:
+    nh = _portfolio([
+        _asset("ZerodhaFund", "Equity", "Small Cap", current=120, invested=100, xirr=None),
+    ])
+    perf = category_performance(nh)
+    assert perf[0].cagr_pct == 20.0, f"expected pnl_pct fallback, got {perf[0].cagr_pct}"
+    assert perf[0].sub_breakdowns[0].cagr_pct == 20.0

@@ -21,4 +21,22 @@ describe("CategoryCard", () => {
     render(<CategoryCard category="X" pnlInr="₹0" cagrPct={null} isPositive />)
     expect(screen.queryByText(/CAGR/)).not.toBeInTheDocument()
   })
+  test("renders sub-category breakdowns when provided", () => {
+    render(
+      <CategoryCard
+        category="Equity"
+        pnlInr="+₹1,20,000"
+        cagrPct="+9.00%"
+        isPositive
+        subBreakdowns={[
+          { label: "Flexi Cap", pnlInr: "+₹1,00,000", cagrPct: "+10.00%", isPositive: true },
+          { label: "Mid Cap", pnlInr: "-₹10,000", cagrPct: "-2.00%", isPositive: false },
+        ]}
+      />,
+    )
+    expect(screen.getByText("Flexi Cap")).toBeInTheDocument()
+    expect(screen.getByText("+₹1,00,000")).toBeInTheDocument()
+    expect(screen.getByText("Mid Cap")).toBeInTheDocument()
+    expect(screen.getByText("-₹10,000")).toBeInTheDocument()
+  })
 })

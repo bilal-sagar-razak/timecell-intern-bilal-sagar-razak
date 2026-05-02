@@ -57,10 +57,17 @@ export interface XirrEntry {
   color: "positive" | "negative"
 }
 
+export interface SubCategoryBreakdown {
+  label: string
+  pnl_inr: number
+  cagr_pct: number | null
+}
+
 export interface CategoryPerformance {
   category: string
   pnl_inr: number
   cagr_pct: number | null
+  sub_breakdowns: SubCategoryBreakdown[]
 }
 
 export interface ParseAndComputeResponse {

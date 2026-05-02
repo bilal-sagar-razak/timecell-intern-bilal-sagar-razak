@@ -13,6 +13,6 @@ test("upload a sample statement, see Overview tab render", async ({ page }) => {
 
   await expect(page.locator("nav a", { hasText: "Overview" }).first()).toBeVisible({ timeout: 60_000 })
   await expect(page.getByText("Allocation")).toBeVisible()
-  await expect(page.getByText("XIRR by Fund")).toBeVisible()
+  await expect(page.getByText("Return by Fund")).toBeVisible()
   await expect(page.getByText("Category Performance")).toBeVisible()
 })
