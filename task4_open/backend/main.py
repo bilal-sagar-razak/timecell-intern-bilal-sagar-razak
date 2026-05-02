@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -35,6 +36,9 @@ from metrics.compute import (
     xirr_by_fund,
 )
 from parser.cache import cache_key, read_cache, write_cache
+from market.cache import get_market_snapshot
+from market.schema import MarketSnapshot
+from agent.loop import RebalanceResult, run_rebalance
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -45,6 +49,14 @@ SUPPORTED_EXTENSIONS = {".xlsx", ".xls", ".pdf", ".png", ".jpg", ".jpeg"}
 
 app = FastAPI(title="Task 4a — Portfolio Intelligence Dashboard backend")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 class ParseAndComputeResponse(BaseModel):
     """Full payload returned by /api/parse-and-compute."""
@@ -54,6 +66,17 @@ class ParseAndComputeResponse(BaseModel):
     xirr_by_fund: list[XirrEntry]
     category_performance: list[CategoryPerformance]
     cached: bool = False
+
+
+class MarketRequest(BaseModel):
+    """Request body for /api/market — holdings JSON + optional refresh."""
+    holdings: NormalizedHoldings
+    refresh: bool = False
+
+
+class RebalanceRequest(BaseModel):
+    """Request body for /api/rebalance — just the holdings (snapshot fetched server-side)."""
+    holdings: NormalizedHoldings
 
 
 @app.get("/api/health")
@@ -173,3 +196,42 @@ async def parse_and_compute(
         return response
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+@app.post("/api/market", response_model=MarketSnapshot)
+def market(req: MarketRequest) -> MarketSnapshot:
+    """Returns Nifty 50 trend + headlines filtered to the user's portfolio."""
+    try:
+        return get_market_snapshot(req.holdings, refresh=req.refresh)
+    except Exception as e:
+        logger.exception("market fetch failed")
+        raise HTTPException(
+            status_code=502,
+            detail={"error": "market data unavailable", "detail": str(e)},
+        )
+
+
+@app.post("/api/rebalance", response_model=RebalanceResult)
+def rebalance(req: RebalanceRequest) -> RebalanceResult:
+    """Run the Sonnet rebalance agent against the holdings + current market snapshot."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail={"error": "rebalance unavailable", "detail": "ANTHROPIC_API_KEY not set"},
+        )
+    snapshot = get_market_snapshot(req.holdings, refresh=False)
+    try:
+        return run_rebalance(req.holdings, snapshot)
+    except BudgetExhausted as e:
+        raise HTTPException(
+            status_code=429,
+            detail={"error": "daily LLM budget exhausted", "detail": str(e)},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("rebalance failed")
+        raise HTTPException(
+            status_code=502,
+            detail={"error": "rebalance failed", "detail": str(e)},
+        )

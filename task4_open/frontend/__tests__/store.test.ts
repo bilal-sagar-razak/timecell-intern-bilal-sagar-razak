@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, test } from "vitest"
 import { usePortfolio } from "@/lib/store"
-import type { ParseAndComputeResponse } from "@/lib/api"
+import type { MarketSnapshot, ParseAndComputeResponse, RebalanceResult } from "@/lib/api"
 
 const STORAGE_KEY = "timecell-portfolio-v1"
 
@@ -65,4 +65,31 @@ test("lastFile is held in memory but excluded from persisted state", () => {
   expect(usePortfolio.getState().lastFile).toBe(file)
   const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
   expect(parsed.state.lastFile).toBeUndefined()
+})
+
+
+test("marketSnapshot is session-only and not in partialize", () => {
+  const snap: MarketSnapshot = {
+    nifty_trend: { points: [], pct_change_period: 0, current: 22000, period_days: 90 },
+    news: [],
+    news_fallback_used: false,
+    cached_at: new Date().toISOString(),
+  }
+  usePortfolio.getState().setData(fakeResponse())
+  usePortfolio.getState().setMarketSnapshot(snap)
+  expect(usePortfolio.getState().marketSnapshot).toEqual(snap)
+  const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+  expect(persisted.state.marketSnapshot).toBeUndefined()
+})
+
+
+test("rebalanceResult is persisted (so a refresh doesn't waste credits)", () => {
+  const r: RebalanceResult = {
+    advice_markdown: "1. Test", trace: [], iterations: 1, truncated: false, cost_usd: 0.01,
+  }
+  usePortfolio.getState().setData(fakeResponse())
+  usePortfolio.getState().setRebalanceResult(r)
+  expect(usePortfolio.getState().rebalanceResult).toEqual(r)
+  const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+  expect(persisted.state.rebalanceResult).toEqual(r)
 })

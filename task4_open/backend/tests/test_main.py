@@ -210,3 +210,87 @@ def test_parse_and_compute_does_not_cache_on_error(tmp_path, monkeypatch) -> Non
     assert r.status_code == 502
     cache_files = list(tmp_path.iterdir())
     assert cache_files == [], f"no cache should be written on error, got {cache_files}"
+
+
+from datetime import date as _date_type, datetime as _dt, timezone as _tz
+
+
+def _fake_market_snapshot():
+    from market.schema import Headline, MarketSnapshot, NiftyPoint, NiftyTrend
+    return MarketSnapshot(
+        nifty_trend=NiftyTrend(
+            points=[NiftyPoint(date=_date_type(2026, 1, 1), close=22000.0),
+                    NiftyPoint(date=_date_type(2026, 1, 2), close=22100.0)],
+            pct_change_period=0.45, current=22100.0, period_days=2,
+        ),
+        news=[Headline(
+            title="Reliance up", publisher="X", url="https://x/x",
+            published_at=_dt(2026, 1, 2, tzinfo=_tz.utc),
+        )],
+        news_fallback_used=False,
+        cached_at=_dt(2026, 1, 2, tzinfo=_tz.utc),
+    )
+
+
+def test_market_endpoint_happy_path(monkeypatch):
+    holdings = _fake_normalized()
+    snap = _fake_market_snapshot()
+    monkeypatch.setattr("main.get_market_snapshot", lambda h, refresh=False: snap)
+    r = client.post("/api/market", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["nifty_trend"]["current"] == 22100.0
+    assert body["news"][0]["title"] == "Reliance up"
+
+
+def test_market_endpoint_yfinance_failure_returns_502(monkeypatch):
+    holdings = _fake_normalized()
+
+    def boom(h, refresh=False):
+        raise RuntimeError("yfinance returned empty Nifty history")
+
+    monkeypatch.setattr("main.get_market_snapshot", boom)
+    r = client.post("/api/market", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 502
+    assert "market data unavailable" in r.json()["detail"]["error"]
+
+
+def test_rebalance_endpoint_happy_path(monkeypatch):
+    from agent.loop import RebalanceResult
+    holdings = _fake_normalized()
+    fake_result = RebalanceResult(
+        advice_markdown="1. Test advice — Evidence: foo.",
+        trace=[], iterations=2, truncated=False, cost_usd=0.05,
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setattr("main.get_market_snapshot", lambda h, refresh=False: _fake_market_snapshot())
+    monkeypatch.setattr("main.run_rebalance", lambda h, s: fake_result)
+    r = client.post("/api/rebalance", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 200
+    body = r.json()
+    assert "Test advice" in body["advice_markdown"]
+    assert body["iterations"] == 2
+    assert body["cost_usd"] == 0.05
+
+
+def test_rebalance_endpoint_no_api_key_returns_503(monkeypatch):
+    holdings = _fake_normalized()
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    r = client.post("/api/rebalance", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 503
+    assert "rebalance unavailable" in r.json()["detail"]["error"]
+
+
+def test_rebalance_endpoint_budget_exhausted_returns_429(monkeypatch):
+    from parser.normalize import BudgetExhausted
+    holdings = _fake_normalized()
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setattr("main.get_market_snapshot", lambda h, refresh=False: _fake_market_snapshot())
+
+    def raise_budget(h, s):
+        raise BudgetExhausted("daily budget $2.00 would be exceeded")
+
+    monkeypatch.setattr("main.run_rebalance", raise_budget)
+    r = client.post("/api/rebalance", json={"holdings": holdings.model_dump(mode="json")})
+    assert r.status_code == 429
+    assert "budget" in r.json()["detail"]["error"].lower()

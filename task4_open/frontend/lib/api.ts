@@ -79,6 +79,46 @@ export interface ParseAndComputeResponse {
   cached: boolean
 }
 
+export interface NiftyPoint { date: string; close: number }
+
+export interface NiftyTrend {
+  points: NiftyPoint[]
+  pct_change_period: number
+  current: number
+  period_days: number
+}
+
+export interface Headline {
+  title: string
+  publisher: string
+  url: string
+  published_at: string
+  snippet: string | null
+}
+
+export interface MarketSnapshot {
+  nifty_trend: NiftyTrend
+  news: Headline[]
+  news_fallback_used: boolean
+  cached_at: string
+}
+
+export interface ToolCall {
+  tool_name: string
+  input_json: Record<string, unknown>
+  output_json: Record<string, unknown>
+  ts: string
+  duration_ms: number
+}
+
+export interface RebalanceResult {
+  advice_markdown: string
+  trace: ToolCall[]
+  iterations: number
+  truncated: boolean
+  cost_usd: number
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string, public detail?: unknown) {
     super(message)
@@ -107,4 +147,42 @@ export async function parseAndCompute(
     }
   }
   return r.json()
+}
+
+/** Long-running endpoints (e.g., the Sonnet agent) bypass the Next.js dev proxy
+ * (which times out around 30s and returns ECONNRESET) by hitting the backend directly. */
+const DIRECT_BACKEND =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
+
+async function _postJson<T>(url: string, body: unknown): Promise<T> {
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  if (!r.ok) {
+    let detail: unknown = null
+    try {
+      const data = await r.json()
+      detail = data.detail
+      throw new ApiError(r.status, data.detail?.error || `HTTP ${r.status}`, detail)
+    } catch (e) {
+      if (e instanceof ApiError) throw e
+      throw new ApiError(r.status, `HTTP ${r.status}`)
+    }
+  }
+  return r.json() as Promise<T>
+}
+
+export function fetchMarketSnapshot(
+  holdings: NormalizedHoldings,
+  opts: { refresh?: boolean } = {},
+): Promise<MarketSnapshot> {
+  return _postJson<MarketSnapshot>("/api/market", { holdings, refresh: opts.refresh ?? false })
+}
+
+export function runRebalance(
+  holdings: NormalizedHoldings,
+): Promise<RebalanceResult> {
+  return _postJson<RebalanceResult>(`${DIRECT_BACKEND}/api/rebalance`, { holdings })
 }
