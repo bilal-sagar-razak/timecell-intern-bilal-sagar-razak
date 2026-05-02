@@ -4,3 +4,22 @@ __pycache__/
 *.pyc
 task2_market/.price_cache*
 .DS_Store
+
+# Task 4: real holdings statements with PII (redacted copies live in task4_open/backend/samples/)
+task4_open/Holdings_Statement_*.xlsx
+task4_open/Portfolio_summary_report*.xls
+task4_open/holdings-EEM619.xlsx
+
+# Task 4 backend
+task4_open/backend/.venv/
+task4_open/backend/__pycache__/
+task4_open/backend/**/__pycache__/
+task4_open/backend/.pytest_cache/
+task4_open/backend/.ruff_cache/
+
+# Task 4 frontend
+task4_open/frontend/node_modules/
+task4_open/frontend/.next/
+task4_open/frontend/playwright-report/
+task4_open/frontend/test-results/
+task4_open/frontend/coverage/
