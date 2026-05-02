@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #13110f;
+  --fg: #efe8da;
+  --fg-soft: #a8a08a;
+  --rule: #2a2620;
+  --rule-soft: #1f1c18;
+  --muted: #8a8275;
+  --muted-deep: #6a6258;
+  --muted-deeper: #5a5240;
+  --brass: #a88b4a;
+  --brass-bright: #c9a86a;
+  --oxblood: #c97a6f;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --color-rule: var(--rule);
+  --color-rule-soft: var(--rule-soft);
+  --color-muted: var(--muted);
+  --color-muted-deep: var(--muted-deep);
+  --color-muted-deeper: var(--muted-deeper);
+  --color-brass: var(--brass);
+  --color-brass-bright: var(--brass-bright);
+  --color-oxblood: var(--oxblood);
+
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tracking-wide-uppercase: 0.22em;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-fraunces), ui-serif, Georgia, serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-image:
+    radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      rgba(168, 139, 74, 0.08) 0%,
+      rgba(168, 139, 74, 0) 60%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 47px,
+      rgba(42, 38, 32, 0.35) 47px,
+      rgba(42, 38, 32, 0.35) 48px
+    );
+  min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+a:focus-visible, button:focus-visible {
+  outline: 1px solid var(--brass);
+  outline-offset: 4px;
+}

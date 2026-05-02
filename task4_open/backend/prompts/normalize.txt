@@ -1,0 +1,66 @@
+You are a financial data extraction system. Convert the following holdings statement into the
+canonical JSON schema below. Output ONLY valid JSON — no markdown, no fences, no preamble.
+
+<extracted_content>
+$extracted_content
+</extracted_content>
+
+<canonical_schema>
+$canonical_schema_json
+</canonical_schema>
+
+<rules>
+- Extract every asset row (mutual fund or stock).
+- For asset_type: "mutual_fund" if name contains "Fund"/"Plan"/"Scheme"; "stock" if it looks
+  like an NSE/BSE symbol (all-caps, no spaces); "etf" if name contains "ETF"; otherwise "other".
+- For category: map to one of "Equity", "Debt", "Hybrid", "Commodities" based on the row's
+  category column, sub-category, or scheme name. If unclear, use null.
+- For sub_category: pass through the statement's sub-category text (e.g. "Flexi Cap", "Gilt").
+- For pnl_inr: if the statement provides P&L, use it; else compute (current_value - invested_value).
+- For pnl_pct: if provided, use it; else compute (pnl / invested * 100).
+- Do NOT compute XIRR — pass it through if the statement provides one, else null.
+- If the source has multiple sheets (e.g. Zerodha's Equity + Mutual Funds + Combined), prefer
+  the Combined sheet. If multiple sheets are passed, dedupe by (isin, name) — emit each unique
+  asset only once.
+- For source_format: classify as "groww_xlsx" if you see Groww-style columns, "camsonline_mhtml"
+  if HTML table structure with category-grouped headers, "zerodha_console" if multi-sheet
+  Equity/MF/Combined layout, otherwise "unknown".
+- For holder_name: extract from the statement header if present.
+- For statement_date: extract any "as on" date if present (ISO format YYYY-MM-DD).
+- All currency values MUST be in INR as floats (no commas, no rupee symbols).
+- If a field is genuinely absent in the source, use null — do NOT guess.
+</rules>
+
+<example_minimal_output>
+{
+  "holder_name": "Test User B",
+  "source_format": "camsonline_mhtml",
+  "summary": {
+    "total_invested_inr": 4149792.26,
+    "total_current_inr": 4481646.82,
+    "total_pnl_inr": 331854.56,
+    "total_pnl_pct": 8.00,
+    "overall_xirr_pct": 4.71,
+    "asset_count": 12,
+    "statement_date": "2026-03-19"
+  },
+  "assets": [
+    {
+      "name": "Parag Parikh Flexi Cap Fund Direct",
+      "asset_type": "mutual_fund",
+      "isin": null,
+      "amc": "PPFAS Mutual Fund",
+      "category": "Equity",
+      "sub_category": "Flexi Cap",
+      "folio": "13959825",
+      "units": 8547.228,
+      "invested_value_inr": 624968.74,
+      "current_value_inr": 763913.63,
+      "xirr_pct": 10.22,
+      "pnl_inr": 138944.89,
+      "pnl_pct": 22.23
+    }
+  ],
+  "parser_warnings": []
+}
+</example_minimal_output>
