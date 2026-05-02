@@ -16,6 +16,7 @@ const PHASES = [
 export function FileUpload() {
   const router = useRouter()
   const setData = usePortfolio((s) => s.setData)
+  const setLastFile = usePortfolio((s) => s.setLastFile)
   const [busy, setBusy] = useState(false)
   const [phase, setPhase] = useState<string>("")
 
@@ -32,6 +33,7 @@ export function FileUpload() {
 
     try {
       const data = await parseAndCompute(file)
+      setLastFile(file)
       setData(data)
       router.push("/dashboard")
     } catch (e) {
@@ -44,7 +46,7 @@ export function FileUpload() {
       setBusy(false)
       setPhase("")
     }
-  }, [router, setData])
+  }, [router, setData, setLastFile])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
