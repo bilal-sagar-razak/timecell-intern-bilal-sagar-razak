@@ -203,7 +203,7 @@ def format_output(parsed: dict) -> str:
     sep = "═" * 60
     return "\n".join([
         sep,
-        "PARSED OUTPUT",
+        "PORTFOLIO OVERVIEW",
         sep,
         "",
         "Summary:",
