@@ -11,7 +11,10 @@
       "as_of_date": "2026-04-30",
       "holdings": [
         {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 8.42, "value_inr": 7372000000, "kind": "equity"},
-        {"name": "Bajaj Holdings", "isin": "INE118A01012", "weight_pct": 7.10, "value_inr": 6215000000, "kind": "equity"}
+        {"name": "Bajaj Holdings", "isin": "INE118A01012", "weight_pct": 7.10, "value_inr": 6215000000, "kind": "equity"},
+        {"name": "ITC", "isin": "INE154A01025", "weight_pct": 5.80, "value_inr": 5077000000, "kind": "equity"},
+        {"name": "Coal India", "isin": "INE522F01014", "weight_pct": 4.30, "value_inr": 3764000000, "kind": "equity"},
+        {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 3.10, "value_inr": 2714000000, "kind": "equity"}
       ],
       "cash_pct": 4.20
     },
@@ -23,9 +26,51 @@
       "as_of_date": "2026-04-30",
       "holdings": [
         {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 9.20, "value_inr": 5980000000, "kind": "equity"},
-        {"name": "ICICI Bank", "isin": "INE090A01021", "weight_pct": 6.50, "value_inr": 4225000000, "kind": "equity"}
+        {"name": "ICICI Bank", "isin": "INE090A01021", "weight_pct": 6.50, "value_inr": 4225000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 5.40, "value_inr": 3510000000, "kind": "equity"},
+        {"name": "Infosys", "isin": "INE009A01021", "weight_pct": 4.20, "value_inr": 2730000000, "kind": "equity"}
       ],
       "cash_pct": 3.10
+    },
+    {
+      "scheme_name": "HDFC Silver ETF FoF - Direct Growth",
+      "isin": "INF179KC1Q67",
+      "amc": "HDFC",
+      "scheme_aum_inr": 5000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Silver ETF Units", "isin": "INF179KC1Q26", "weight_pct": 99.20, "value_inr": 4960000000, "kind": "other"}
+      ],
+      "cash_pct": 0.80
+    },
+    {
+      "scheme_name": "ICICI Prudential Multi Asset Fund - Direct Growth",
+      "isin": "INF109K016L0",
+      "amc": "ICICI Pru",
+      "scheme_aum_inr": 320000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "ICICI Bank", "isin": "INE090A01021", "weight_pct": 7.20, "value_inr": 23040000000, "kind": "equity"},
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 5.80, "value_inr": 18560000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 4.50, "value_inr": 14400000000, "kind": "equity"},
+        {"name": "Maruti Suzuki", "isin": "INE585B01010", "weight_pct": 3.80, "value_inr": 12160000000, "kind": "equity"},
+        {"name": "GOI 7.10% 2034", "isin": null, "weight_pct": 12.0, "value_inr": 38400000000, "kind": "debt"},
+        {"name": "Gold ETF", "isin": null, "weight_pct": 8.50, "value_inr": 27200000000, "kind": "other"}
+      ],
+      "cash_pct": 5.40
+    },
+    {
+      "scheme_name": "ICICI Prudential Short Term Fund - Direct Growth",
+      "isin": "INF109K01530",
+      "amc": "ICICI Pru",
+      "scheme_aum_inr": 180000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "GOI 6.99% 2026", "isin": null, "weight_pct": 18.0, "value_inr": 32400000000, "kind": "debt"},
+        {"name": "HDFC Bank NCD", "isin": null, "weight_pct": 10.5, "value_inr": 18900000000, "kind": "debt"},
+        {"name": "REC NCD", "isin": null, "weight_pct": 8.20, "value_inr": 14760000000, "kind": "debt"}
+      ],
+      "cash_pct": 6.30
     },
     {
       "scheme_name": "ICICI Pru Gilt Fund - Direct Growth",
@@ -34,9 +79,146 @@
       "scheme_aum_inr": 12000000000,
       "as_of_date": "2026-04-30",
       "holdings": [
-        {"name": "GOI 7.18% 2033", "isin": null, "weight_pct": 45.0, "value_inr": 5400000000, "kind": "debt"}
+        {"name": "GOI 7.18% 2033", "isin": null, "weight_pct": 45.0, "value_inr": 5400000000, "kind": "debt"},
+        {"name": "GOI 7.26% 2032", "isin": null, "weight_pct": 30.0, "value_inr": 3600000000, "kind": "debt"}
       ],
       "cash_pct": 8.50
+    },
+    {
+      "scheme_name": "ICICI Prudential BHARAT 22 FOF - Direct Growth",
+      "isin": "INF109KC1Q83",
+      "amc": "ICICI Pru",
+      "scheme_aum_inr": 18000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "NTPC", "isin": "INE733E01010", "weight_pct": 16.20, "value_inr": 2916000000, "kind": "equity"},
+        {"name": "ITC", "isin": "INE154A01025", "weight_pct": 14.80, "value_inr": 2664000000, "kind": "equity"},
+        {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 12.40, "value_inr": 2232000000, "kind": "equity"},
+        {"name": "Coal India", "isin": "INE522F01014", "weight_pct": 10.50, "value_inr": 1890000000, "kind": "equity"},
+        {"name": "Bharat Electronics", "isin": "INE263A01024", "weight_pct": 8.20, "value_inr": 1476000000, "kind": "equity"}
+      ],
+      "cash_pct": 1.80
+    },
+    {
+      "scheme_name": "Nippon India Power & Infra Fund - Direct Growth",
+      "isin": "INF204K01YA5",
+      "amc": "Nippon",
+      "scheme_aum_inr": 45000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 8.80, "value_inr": 3960000000, "kind": "equity"},
+        {"name": "NTPC", "isin": "INE733E01010", "weight_pct": 7.50, "value_inr": 3375000000, "kind": "equity"},
+        {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 6.20, "value_inr": 2790000000, "kind": "equity"},
+        {"name": "Larsen & Toubro", "isin": "INE018A01030", "weight_pct": 5.60, "value_inr": 2520000000, "kind": "equity"},
+        {"name": "Bharat Electronics", "isin": "INE263A01024", "weight_pct": 4.80, "value_inr": 2160000000, "kind": "equity"}
+      ],
+      "cash_pct": 3.20
+    },
+    {
+      "scheme_name": "Nippon India Small Cap Fund - Direct Growth",
+      "isin": "INF204K01ZG1",
+      "amc": "Nippon",
+      "scheme_aum_inr": 580000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 2.10, "value_inr": 12180000000, "kind": "equity"},
+        {"name": "Tube Investments", "isin": "INE149A01033", "weight_pct": 2.30, "value_inr": 13340000000, "kind": "equity"},
+        {"name": "Multi Commodity Exchange", "isin": "INE745G01035", "weight_pct": 1.90, "value_inr": 11020000000, "kind": "equity"},
+        {"name": "Apar Industries", "isin": "INE372A01015", "weight_pct": 1.80, "value_inr": 10440000000, "kind": "equity"}
+      ],
+      "cash_pct": 4.50
+    },
+    {
+      "scheme_name": "Motilal Oswal Midcap Fund - Direct Growth",
+      "isin": "INF247L01890",
+      "amc": "Motilal Oswal",
+      "scheme_aum_inr": 95000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Persistent Systems", "isin": "INE262H01013", "weight_pct": 9.40, "value_inr": 8930000000, "kind": "equity"},
+        {"name": "Coforge", "isin": "INE591G01017", "weight_pct": 8.20, "value_inr": 7790000000, "kind": "equity"},
+        {"name": "Tube Investments", "isin": "INE149A01033", "weight_pct": 6.10, "value_inr": 5795000000, "kind": "equity"},
+        {"name": "Polycab India", "isin": "INE455K01017", "weight_pct": 5.50, "value_inr": 5225000000, "kind": "equity"}
+      ],
+      "cash_pct": 5.80
+    },
+    {
+      "scheme_name": "Bandhan Infrastructure Fund - Direct Plan Growth",
+      "isin": "INF194K01HG8",
+      "amc": "Bandhan",
+      "scheme_aum_inr": 14000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Larsen & Toubro", "isin": "INE018A01030", "weight_pct": 8.40, "value_inr": 1176000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 7.10, "value_inr": 994000000, "kind": "equity"},
+        {"name": "NTPC", "isin": "INE733E01010", "weight_pct": 6.30, "value_inr": 882000000, "kind": "equity"},
+        {"name": "Bharat Electronics", "isin": "INE263A01024", "weight_pct": 5.40, "value_inr": 756000000, "kind": "equity"},
+        {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 4.90, "value_inr": 686000000, "kind": "equity"}
+      ],
+      "cash_pct": 3.40
+    },
+    {
+      "scheme_name": "Invesco India PSU Equity Fund - Direct Growth",
+      "isin": "INF205K01CE2",
+      "amc": "Invesco",
+      "scheme_aum_inr": 12000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "NTPC", "isin": "INE733E01010", "weight_pct": 9.80, "value_inr": 1176000000, "kind": "equity"},
+        {"name": "Coal India", "isin": "INE522F01014", "weight_pct": 8.40, "value_inr": 1008000000, "kind": "equity"},
+        {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 7.60, "value_inr": 912000000, "kind": "equity"},
+        {"name": "SBI", "isin": "INE062A01020", "weight_pct": 7.10, "value_inr": 852000000, "kind": "equity"},
+        {"name": "Bharat Electronics", "isin": "INE263A01024", "weight_pct": 6.80, "value_inr": 816000000, "kind": "equity"}
+      ],
+      "cash_pct": 2.90
+    },
+    {
+      "scheme_name": "Tata Gold ETF FoF - Direct Growth",
+      "isin": "INF277KA1WG3",
+      "amc": "Tata",
+      "scheme_aum_inr": 8000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Tata Gold ETF Units", "isin": "INF277KA1WF5", "weight_pct": 98.50, "value_inr": 7880000000, "kind": "other"}
+      ],
+      "cash_pct": 1.50
+    },
+    {
+      "scheme_name": "SBI Gold Fund - Direct Plan Growth",
+      "isin": "INF200K01TM1",
+      "amc": "SBI",
+      "scheme_aum_inr": 28000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "SBI Gold ETF Units", "isin": "INF200KA1FY3", "weight_pct": 99.10, "value_inr": 27748000000, "kind": "other"}
+      ],
+      "cash_pct": 0.90
+    },
+    {
+      "scheme_name": "SBI Silver ETF FoF - Direct Growth",
+      "isin": "INF200KA1JR0",
+      "amc": "SBI",
+      "scheme_aum_inr": 6000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "SBI Silver ETF Units", "isin": "INF200KA1JQ2", "weight_pct": 98.80, "value_inr": 5928000000, "kind": "other"}
+      ],
+      "cash_pct": 1.20
+    },
+    {
+      "scheme_name": "SBI PSU Fund - Direct Plan Growth",
+      "isin": "INF200K01YJ7",
+      "amc": "SBI",
+      "scheme_aum_inr": 35000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "SBI", "isin": "INE062A01020", "weight_pct": 9.50, "value_inr": 3325000000, "kind": "equity"},
+        {"name": "NTPC", "isin": "INE733E01010", "weight_pct": 8.20, "value_inr": 2870000000, "kind": "equity"},
+        {"name": "Coal India", "isin": "INE522F01014", "weight_pct": 7.80, "value_inr": 2730000000, "kind": "equity"},
+        {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 6.40, "value_inr": 2240000000, "kind": "equity"},
+        {"name": "Bharat Electronics", "isin": "INE263A01024", "weight_pct": 5.90, "value_inr": 2065000000, "kind": "equity"}
+      ],
+      "cash_pct": 3.60
     },
     {
       "scheme_name": "Quant Active Fund - Direct Growth",
@@ -46,9 +228,38 @@
       "as_of_date": "2026-04-30",
       "holdings": [
         {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 5.10, "value_inr": 1122000000, "kind": "equity"},
-        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 4.20, "value_inr": 924000000, "kind": "equity"}
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 4.20, "value_inr": 924000000, "kind": "equity"},
+        {"name": "ITC", "isin": "INE154A01025", "weight_pct": 3.80, "value_inr": 836000000, "kind": "equity"}
       ],
       "cash_pct": 2.10
+    },
+    {
+      "scheme_name": "Quant Small Cap Fund - Direct Plan Growth",
+      "isin": "INF966L01689",
+      "amc": "Quant",
+      "scheme_aum_inr": 270000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 4.80, "value_inr": 12960000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 4.20, "value_inr": 11340000000, "kind": "equity"},
+        {"name": "Aegis Logistics", "isin": "INE208C01025", "weight_pct": 3.60, "value_inr": 9720000000, "kind": "equity"},
+        {"name": "Apar Industries", "isin": "INE372A01015", "weight_pct": 3.10, "value_inr": 8370000000, "kind": "equity"}
+      ],
+      "cash_pct": 4.80
+    },
+    {
+      "scheme_name": "Quant Infrastructure Fund - Direct Growth",
+      "isin": "INF966L01473",
+      "amc": "Quant",
+      "scheme_aum_inr": 28000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 8.20, "value_inr": 2296000000, "kind": "equity"},
+        {"name": "Larsen & Toubro", "isin": "INE018A01030", "weight_pct": 6.40, "value_inr": 1792000000, "kind": "equity"},
+        {"name": "NTPC", "isin": "INE733E01010", "weight_pct": 5.80, "value_inr": 1624000000, "kind": "equity"},
+        {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 5.10, "value_inr": 1428000000, "kind": "equity"}
+      ],
+      "cash_pct": 3.50
     }
   ]
 }
