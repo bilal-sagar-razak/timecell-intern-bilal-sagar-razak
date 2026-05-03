@@ -32,21 +32,24 @@ export function OverlapHeatmap({ data, onSelect, selected }: Props) {
       >
         <div></div>
         {data.funds.map((f, j) => (
-          <div
-            key={`col-${j}`}
-            className="cursor-help overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[0.6rem] uppercase tracking-[0.18em] text-muted-deep"
-            title={f.asset_name}
-          >
-            {f.asset_name}
+          <div key={`col-${j}`} className="group relative">
+            <div className="cursor-help overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[0.6rem] uppercase tracking-[0.18em] text-muted-deep">
+              {f.asset_name}
+            </div>
+            <div className="pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-1 -translate-x-1/2 whitespace-nowrap border border-rule bg-bg px-2 py-1 font-serif text-xs text-fg shadow-lg group-hover:visible">
+              {f.asset_name}
+            </div>
           </div>
         ))}
         {data.funds.map((rowFund, i) => (
           <div key={`row-${i}`} className="contents">
-            <div
-              className="cursor-help overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-deep"
-              title={rowFund.asset_name}
-            >
-              {rowFund.asset_name}
+            <div className="group relative self-center">
+              <div className="cursor-help overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-deep">
+                {rowFund.asset_name}
+              </div>
+              <div className="pointer-events-none invisible absolute left-0 top-full z-20 mt-1 whitespace-nowrap border border-rule bg-bg px-2 py-1 font-serif text-xs text-fg shadow-lg group-hover:visible">
+                {rowFund.asset_name}
+              </div>
             </div>
             {data.funds.map((_, j) => {
               const cell = data.matrix[i][j]
