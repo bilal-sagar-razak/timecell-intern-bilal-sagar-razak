@@ -16,3 +16,5 @@ yfinance>=0.2.40
 feedparser>=6.0.10
 pytest>=8.3.0
 ruff>=0.7.0
+rapidfuzz>=3.10
+xlrd>=2.0.1
