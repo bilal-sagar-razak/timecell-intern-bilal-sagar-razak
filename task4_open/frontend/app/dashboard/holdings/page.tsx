@@ -63,7 +63,7 @@ export default function HoldingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-xl text-fg">Your funds</h2>
+        <h2 className="font-serif text-xl text-fg">Fund overlap</h2>
         <button
           onClick={() => void load()}
           disabled={loading}
@@ -73,17 +73,6 @@ export default function HoldingsPage() {
         </button>
       </div>
 
-      {holdings ? (
-        <HoldingsTable assets={data.normalized.assets} matches={holdings.matches} />
-      ) : (
-        <div className="flex min-h-[20vh] items-center justify-center">
-          <span className="font-mono text-sm text-muted-deep">Loading per-fund data…</span>
-        </div>
-      )}
-
-      <hr className="border-rule" />
-
-      <h2 className="font-serif text-xl text-fg">Fund overlap</h2>
       {overlap && overlap.funds.length >= 2 ? (
         <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
           <OverlapHeatmap data={overlap} onSelect={(i, j) => setSelectedPair({ i, j })} selected={selectedPair} />
@@ -96,6 +85,17 @@ export default function HoldingsPage() {
       ) : (
         <div className="flex min-h-[20vh] items-center justify-center">
           <span className="font-mono text-sm text-muted-deep">Loading overlap…</span>
+        </div>
+      )}
+
+      <hr className="border-rule" />
+
+      <h2 className="font-serif text-xl text-fg">Your funds</h2>
+      {holdings ? (
+        <HoldingsTable assets={data.normalized.assets} matches={holdings.matches} />
+      ) : (
+        <div className="flex min-h-[20vh] items-center justify-center">
+          <span className="font-mono text-sm text-muted-deep">Loading per-fund data…</span>
         </div>
       )}
 

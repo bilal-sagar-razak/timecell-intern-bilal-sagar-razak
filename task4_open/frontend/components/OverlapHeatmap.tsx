@@ -28,17 +28,22 @@ export function OverlapHeatmap({ data, onSelect, selected }: Props) {
       </div>
       <div
         className="grid gap-1"
-        style={{ gridTemplateColumns: `8rem repeat(${n}, minmax(2.5rem, 1fr))` }}
+        style={{ gridTemplateColumns: `16rem repeat(${n}, minmax(2.5rem, 1fr))` }}
       >
         <div></div>
         {data.funds.map((f, j) => (
-          <div key={`col-${j}`} className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[0.6rem] uppercase tracking-[0.18em] text-muted-deep">
+          <div
+            key={`col-${j}`}
+            className="flex h-40 items-end justify-center font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-deep"
+            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+            title={f.asset_name}
+          >
             {f.asset_name}
           </div>
         ))}
         {data.funds.map((rowFund, i) => (
           <div key={`row-${i}`} className="contents">
-            <div className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[0.65rem] uppercase tracking-[0.18em] text-muted-deep">
+            <div className="self-center pr-3 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-deep" title={rowFund.asset_name}>
               {rowFund.asset_name}
             </div>
             {data.funds.map((_, j) => {
