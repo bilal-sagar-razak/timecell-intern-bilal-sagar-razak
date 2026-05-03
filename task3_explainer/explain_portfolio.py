@@ -243,6 +243,19 @@ def call_critique_llm(prompt: str, model: str) -> str:
     return response.choices[0].message.content
 
 
+def _short_err(e: Exception) -> str:
+    """Compact one-line summary of an SDK exception for log messages."""
+    name = type(e).__name__
+    msg = str(e)
+    if "insufficient_quota" in msg or "exceeded your current quota" in msg:
+        return f"{name}: OpenAI quota exhausted (skipping critique)"
+    if "401" in msg or "Unauthorized" in msg or "invalid_api_key" in msg:
+        return f"{name}: invalid OpenAI API key"
+    if len(msg) > 160:
+        msg = msg[:160] + "…"
+    return f"{name}: {msg}"
+
+
 def _check_api_keys() -> tuple[bool, bool]:
     """Verify env vars are set. Exits 1 if Anthropic missing or both missing."""
     have_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
@@ -293,12 +306,21 @@ def main() -> None:
         default=DEFAULT_ANTHROPIC_MODEL,
         help=f"Anthropic model ID (default: {DEFAULT_ANTHROPIC_MODEL})",
     )
+    parser.add_argument(
+        "--no-critique",
+        action="store_true",
+        help="Skip the OpenAI critique→refine loop (use this when the OpenAI key is unavailable or out of quota).",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
     )
+    # SDK-level transport noise (HTTP retries, request logging) is not useful
+    # to the end user; surface our own messages only.
+    for noisy in ("openai", "httpx", "httpcore", "anthropic"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
     # Load .env if present (lazy import — keep import error visible if missing)
     from dotenv import load_dotenv
@@ -316,7 +338,9 @@ def main() -> None:
 
     # Refinement loop (gated on OpenAI availability, fail-quiet on errors)
     final_parsed = parsed_v1
-    if have_openai:
+    if args.no_critique:
+        logging.info("--no-critique passed; skipping OpenAI critique→refine loop")
+    elif have_openai:
         critique_prompt = build_critique_prompt(portfolio, metrics, raw_v1)
         try:
             critique_raw = call_critique_llm(critique_prompt, DEFAULT_OPENAI_CRITIQUE_MODEL)
@@ -337,17 +361,11 @@ def main() -> None:
                     final_parsed = parse_response(raw_v2)
                     logging.info("explanation refined using critique feedback")
                 except Exception as e:
-                    logging.warning(
-                        f"refinement call failed, falling back to v1: {e}",
-                        exc_info=True,
-                    )
+                    logging.warning("refinement call failed, falling back to v1: %s", _short_err(e))
             else:
                 logging.info("critique found no issues; v1 used as final")
         except Exception as e:
-            logging.warning(
-                f"critique unavailable, no refinement applied: {e}",
-                exc_info=True,
-            )
+            logging.warning("critique unavailable, no refinement applied: %s", _short_err(e))
 
     # Output: portfolio constituents first (so the explanation has context),
     # then the parsed user-facing output. Raw LLM response is intentionally
