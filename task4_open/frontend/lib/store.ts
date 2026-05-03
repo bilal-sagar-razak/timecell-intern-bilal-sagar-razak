@@ -31,7 +31,14 @@ export const usePortfolio = create<PortfolioState>()(
       rebalanceResult: null,
       holdingsData: null,
       overlapData: null,
-      setData: (d) => set({ data: d }),
+      setData: (d) =>
+        set({
+          data: d,
+          marketSnapshot: null,
+          rebalanceResult: null,
+          holdingsData: null,
+          overlapData: null,
+        }),
       setLastFile: (f) => set({ lastFile: f }),
       setMarketSnapshot: (s) => set({ marketSnapshot: s }),
       setRebalanceResult: (r) => set({ rebalanceResult: r }),
