@@ -260,6 +260,133 @@
         {"name": "Power Grid Corp", "isin": "INE752E01010", "weight_pct": 5.10, "value_inr": 1428000000, "kind": "equity"}
       ],
       "cash_pct": 3.50
+    },
+    {
+      "scheme_name": "Quant Flexi Cap Fund - Direct Growth",
+      "isin": "INF966L01515",
+      "amc": "Quant",
+      "scheme_aum_inr": 22000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 5.40, "value_inr": 1188000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 4.60, "value_inr": 1012000000, "kind": "equity"},
+        {"name": "ITC", "isin": "INE154A01025", "weight_pct": 4.10, "value_inr": 902000000, "kind": "equity"},
+        {"name": "Larsen & Toubro", "isin": "INE018A01030", "weight_pct": 3.80, "value_inr": 836000000, "kind": "equity"}
+      ],
+      "cash_pct": 3.20
+    },
+    {
+      "scheme_name": "Bandhan Small Cap Fund - Direct Growth",
+      "isin": "INF194KB1KP3",
+      "amc": "Bandhan",
+      "scheme_aum_inr": 90000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Tube Investments", "isin": "INE149A01033", "weight_pct": 2.90, "value_inr": 2610000000, "kind": "equity"},
+        {"name": "Multi Commodity Exchange", "isin": "INE745G01035", "weight_pct": 2.70, "value_inr": 2430000000, "kind": "equity"},
+        {"name": "Apar Industries", "isin": "INE372A01015", "weight_pct": 2.20, "value_inr": 1980000000, "kind": "equity"},
+        {"name": "BSE", "isin": "INE118H01025", "weight_pct": 2.10, "value_inr": 1890000000, "kind": "equity"}
+      ],
+      "cash_pct": 5.50
+    },
+    {
+      "scheme_name": "Canara Robeco Large Cap Fund - Direct Growth",
+      "isin": "INF760K01795",
+      "amc": "Canara Robeco",
+      "scheme_aum_inr": 18000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 9.40, "value_inr": 1692000000, "kind": "equity"},
+        {"name": "ICICI Bank", "isin": "INE090A01021", "weight_pct": 7.80, "value_inr": 1404000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 6.50, "value_inr": 1170000000, "kind": "equity"},
+        {"name": "Infosys", "isin": "INE009A01021", "weight_pct": 5.20, "value_inr": 936000000, "kind": "equity"},
+        {"name": "Larsen & Toubro", "isin": "INE018A01030", "weight_pct": 4.10, "value_inr": 738000000, "kind": "equity"}
+      ],
+      "cash_pct": 2.80
+    },
+    {
+      "scheme_name": "Edelweiss Mid Cap Fund - Direct Growth",
+      "isin": "INF754K01OL3",
+      "amc": "Edelweiss",
+      "scheme_aum_inr": 65000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Persistent Systems", "isin": "INE262H01013", "weight_pct": 7.20, "value_inr": 4680000000, "kind": "equity"},
+        {"name": "Coforge", "isin": "INE591G01017", "weight_pct": 6.40, "value_inr": 4160000000, "kind": "equity"},
+        {"name": "Tube Investments", "isin": "INE149A01033", "weight_pct": 5.10, "value_inr": 3315000000, "kind": "equity"},
+        {"name": "Polycab India", "isin": "INE455K01017", "weight_pct": 4.30, "value_inr": 2795000000, "kind": "equity"}
+      ],
+      "cash_pct": 4.20
+    },
+    {
+      "scheme_name": "HDFC Large and Mid Cap Fund - Direct Growth",
+      "isin": "INF179KA1Y84",
+      "amc": "HDFC",
+      "scheme_aum_inr": 240000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 7.10, "value_inr": 17040000000, "kind": "equity"},
+        {"name": "ICICI Bank", "isin": "INE090A01021", "weight_pct": 5.40, "value_inr": 12960000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 4.20, "value_inr": 10080000000, "kind": "equity"},
+        {"name": "Persistent Systems", "isin": "INE262H01013", "weight_pct": 3.80, "value_inr": 9120000000, "kind": "equity"},
+        {"name": "Tube Investments", "isin": "INE149A01033", "weight_pct": 3.20, "value_inr": 7680000000, "kind": "equity"}
+      ],
+      "cash_pct": 4.10
+    },
+    {
+      "scheme_name": "Kotak Gilt Fund - Direct Growth",
+      "isin": "INF174K01QC1",
+      "amc": "Kotak",
+      "scheme_aum_inr": 30000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "GOI 7.18% 2033", "isin": null, "weight_pct": 38.0, "value_inr": 11400000000, "kind": "debt"},
+        {"name": "GOI 7.10% 2034", "isin": null, "weight_pct": 25.0, "value_inr": 7500000000, "kind": "debt"},
+        {"name": "GOI 7.26% 2032", "isin": null, "weight_pct": 18.0, "value_inr": 5400000000, "kind": "debt"}
+      ],
+      "cash_pct": 7.40
+    },
+    {
+      "scheme_name": "SBI Gilt Fund - Direct Growth",
+      "isin": "INF200K01N28",
+      "amc": "SBI",
+      "scheme_aum_inr": 65000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "GOI 7.18% 2033", "isin": null, "weight_pct": 35.0, "value_inr": 22750000000, "kind": "debt"},
+        {"name": "GOI 7.26% 2032", "isin": null, "weight_pct": 28.0, "value_inr": 18200000000, "kind": "debt"},
+        {"name": "GOI 6.99% 2026", "isin": null, "weight_pct": 15.0, "value_inr": 9750000000, "kind": "debt"}
+      ],
+      "cash_pct": 6.20
+    },
+    {
+      "scheme_name": "Nippon India Large Cap Fund - Direct Growth",
+      "isin": "INF204K01ED4",
+      "amc": "Nippon",
+      "scheme_aum_inr": 280000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 9.10, "value_inr": 25480000000, "kind": "equity"},
+        {"name": "ICICI Bank", "isin": "INE090A01021", "weight_pct": 7.60, "value_inr": 21280000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 6.20, "value_inr": 17360000000, "kind": "equity"},
+        {"name": "Larsen & Toubro", "isin": "INE018A01030", "weight_pct": 4.80, "value_inr": 13440000000, "kind": "equity"},
+        {"name": "Infosys", "isin": "INE009A01021", "weight_pct": 4.30, "value_inr": 12040000000, "kind": "equity"}
+      ],
+      "cash_pct": 3.20
+    },
+    {
+      "scheme_name": "Tata Small Cap Fund - Direct Growth",
+      "isin": "INF277K01YH8",
+      "amc": "Tata",
+      "scheme_aum_inr": 95000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "Tube Investments", "isin": "INE149A01033", "weight_pct": 2.80, "value_inr": 2660000000, "kind": "equity"},
+        {"name": "Multi Commodity Exchange", "isin": "INE745G01035", "weight_pct": 2.50, "value_inr": 2375000000, "kind": "equity"},
+        {"name": "Apar Industries", "isin": "INE372A01015", "weight_pct": 2.30, "value_inr": 2185000000, "kind": "equity"},
+        {"name": "Aegis Logistics", "isin": "INE208C01025", "weight_pct": 2.10, "value_inr": 1995000000, "kind": "equity"}
+      ],
+      "cash_pct": 5.30
     }
   ]
 }
