@@ -119,6 +119,64 @@ export interface RebalanceResult {
   cost_usd: number
 }
 
+export interface FundHolding {
+  name: string
+  isin: string | null
+  weight_pct: number
+  value_inr: number
+  kind: string
+}
+
+export interface AmfiScheme {
+  scheme_name: string
+  isin: string | null
+  amc: string
+  scheme_aum_inr: number
+  as_of_date: string
+  holdings: FundHolding[]
+  cash_pct: number
+}
+
+export interface FundMatch {
+  asset_name: string
+  asset_isin: string | null
+  matched: boolean
+  matched_by: "isin" | "name" | "none"
+  confidence: number
+  scheme: AmfiScheme | null
+}
+
+export interface HoldingsResponse {
+  matches: FundMatch[]
+}
+
+export interface OverlapFund {
+  asset_name: string
+  scheme_name: string | null
+  matched_by: "isin" | "name" | "none"
+}
+
+export interface OverlapCell {
+  i: number
+  j: number
+  overlap_pct: number
+  shared_count: number
+}
+
+export interface SharedStock {
+  name: string
+  isin: string | null
+  weight_a: number
+  weight_b: number
+  min: number
+}
+
+export interface OverlapResponse {
+  funds: OverlapFund[]
+  matrix: OverlapCell[][]
+  shared_stocks_index: Record<string, SharedStock[]>
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string, public detail?: unknown) {
     super(message)
@@ -185,4 +243,16 @@ export function runRebalance(
   holdings: NormalizedHoldings,
 ): Promise<RebalanceResult> {
   return _postJson<RebalanceResult>(`${DIRECT_BACKEND}/api/rebalance`, { holdings })
+}
+
+export function fetchHoldingsPerFund(
+  holdings: NormalizedHoldings,
+): Promise<HoldingsResponse> {
+  return _postJson<HoldingsResponse>("/api/holdings/per-fund", { holdings })
+}
+
+export function fetchOverlap(
+  holdings: NormalizedHoldings,
+): Promise<OverlapResponse> {
+  return _postJson<OverlapResponse>("/api/holdings/overlap", { holdings })
 }

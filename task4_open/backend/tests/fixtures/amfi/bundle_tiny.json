@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "as_of_month": "2026-04",
+  "fetched_at": "2026-05-03T12:00:00Z",
+  "schemes": [
+    {
+      "scheme_name": "Parag Parikh Flexi Cap Fund - Direct Growth",
+      "isin": "INF879O01027",
+      "amc": "PPFAS",
+      "scheme_aum_inr": 87543210000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 8.42, "value_inr": 7372000000, "kind": "equity"},
+        {"name": "Bajaj Holdings", "isin": "INE118A01012", "weight_pct": 7.10, "value_inr": 6215000000, "kind": "equity"}
+      ],
+      "cash_pct": 4.20
+    },
+    {
+      "scheme_name": "HDFC Flexi Cap Fund - Direct Growth",
+      "isin": "INF179K01YV8",
+      "amc": "HDFC",
+      "scheme_aum_inr": 65000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 9.20, "value_inr": 5980000000, "kind": "equity"},
+        {"name": "ICICI Bank", "isin": "INE090A01021", "weight_pct": 6.50, "value_inr": 4225000000, "kind": "equity"}
+      ],
+      "cash_pct": 3.10
+    },
+    {
+      "scheme_name": "ICICI Pru Gilt Fund - Direct Growth",
+      "isin": "INF109K01ZF6",
+      "amc": "ICICI Pru",
+      "scheme_aum_inr": 12000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "GOI 7.18% 2033", "isin": null, "weight_pct": 45.0, "value_inr": 5400000000, "kind": "debt"}
+      ],
+      "cash_pct": 8.50
+    },
+    {
+      "scheme_name": "Quant Active Fund - Direct Growth",
+      "isin": "INF966L01366",
+      "amc": "Quant",
+      "scheme_aum_inr": 22000000000,
+      "as_of_date": "2026-04-30",
+      "holdings": [
+        {"name": "HDFC Bank", "isin": "INE040A01034", "weight_pct": 5.10, "value_inr": 1122000000, "kind": "equity"},
+        {"name": "Reliance Industries", "isin": "INE002A01018", "weight_pct": 4.20, "value_inr": 924000000, "kind": "equity"}
+      ],
+      "cash_pct": 2.10
+    }
+  ]
+}

@@ -39,6 +39,13 @@ from parser.cache import cache_key, read_cache, write_cache
 from market.cache import get_market_snapshot
 from market.schema import MarketSnapshot
 from agent.loop import RebalanceResult, run_rebalance
+from amfi.bundle import BundleMalformed, BundleMissing, load_bundle
+from amfi.match import match_user_funds
+from holdings.api import (
+    HoldingsRequest, OverlapCell, OverlapFund, OverlapResponse,
+    PerFundResponse, SharedStock,
+)
+from holdings.overlap import build_matrix
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -209,6 +216,46 @@ def market(req: MarketRequest) -> MarketSnapshot:
             status_code=502,
             detail={"error": "market data unavailable", "detail": str(e)},
         )
+
+
+@app.post("/api/holdings/per-fund", response_model=PerFundResponse)
+def holdings_per_fund(req: HoldingsRequest) -> PerFundResponse:
+    """Return per-fund AMFI scheme matches (ISIN-first, fuzzy name fallback)."""
+    try:
+        bundle = load_bundle()
+    except BundleMissing as e:
+        raise HTTPException(status_code=503, detail={"error": "bundle missing", "detail": str(e)})
+    except BundleMalformed as e:
+        raise HTTPException(status_code=503, detail={"error": "bundle malformed", "detail": str(e)})
+    matches = match_user_funds(req.holdings.assets, bundle)
+    return PerFundResponse(matches=matches)
+
+
+@app.post("/api/holdings/overlap", response_model=OverlapResponse)
+def holdings_overlap(req: HoldingsRequest) -> OverlapResponse:
+    """Return symmetric weighted overlap matrix + shared-stocks index."""
+    try:
+        bundle = load_bundle()
+    except BundleMissing as e:
+        raise HTTPException(status_code=503, detail={"error": "bundle missing", "detail": str(e)})
+    except BundleMalformed as e:
+        raise HTTPException(status_code=503, detail={"error": "bundle malformed", "detail": str(e)})
+    matches = match_user_funds(req.holdings.assets, bundle)
+    matched_with_schemes = [
+        {"asset_name": m.asset_name, "scheme_name": m.scheme.scheme_name,
+         "matched_by": m.matched_by, "scheme": m.scheme}
+        for m in matches if m.matched and m.scheme is not None
+    ]
+    out = build_matrix(matched_with_schemes)
+    funds = [
+        OverlapFund(asset_name=m["asset_name"], scheme_name=m["scheme_name"], matched_by=m["matched_by"])
+        for m in matched_with_schemes
+    ]
+    matrix = [[OverlapCell(**cell) for cell in row] for row in out["matrix"]]
+    shared_index = {
+        k: [SharedStock(**s) for s in v] for k, v in out["shared_stocks_index"].items()
+    }
+    return OverlapResponse(funds=funds, matrix=matrix, shared_stocks_index=shared_index)
 
 
 @app.post("/api/rebalance", response_model=RebalanceResult)

@@ -294,3 +294,71 @@ def test_rebalance_endpoint_budget_exhausted_returns_429(monkeypatch):
     r = client.post("/api/rebalance", json={"holdings": holdings.model_dump(mode="json")})
     assert r.status_code == 429
     assert "budget" in r.json()["detail"]["error"].lower()
+
+
+@pytest.fixture
+def _live_bundle(monkeypatch):
+    """Point amfi/bundle at the tiny test fixture so endpoint tests don't need data/amfi_holdings.json."""
+    src = Path(__file__).parent / "fixtures" / "amfi" / "bundle_tiny.json"
+    monkeypatch.setattr("amfi.bundle.BUNDLE_PATH", src)
+    from amfi import bundle
+    bundle._cached = None
+    yield
+    bundle._cached = None
+
+
+def _holdings_with_one_known_fund() -> dict:
+    """A holdings JSON with one fund that matches the tiny bundle by ISIN."""
+    return {
+        "holder_name": "Test", "source_format": "test",
+        "summary": {
+            "total_invested_inr": 1000.0, "total_current_inr": 1100.0,
+            "total_pnl_inr": 100.0, "total_pnl_pct": 10.0,
+            "asset_count": 1, "overall_xirr_pct": None, "statement_date": None,
+        },
+        "assets": [
+            {"name": "Parag Parikh Flexi Cap", "asset_type": "mutual_fund",
+             "isin": "INF879O01027", "amc": "PPFAS", "category": "Equity",
+             "sub_category": "Flexi Cap", "folio": None, "units": 100.0,
+             "invested_value_inr": 1000.0, "current_value_inr": 1100.0,
+             "xirr_pct": None, "pnl_inr": 100.0, "pnl_pct": 10.0},
+        ],
+        "parser_warnings": [],
+    }
+
+
+def test_per_fund_endpoint_happy_path(_live_bundle):
+    body = _holdings_with_one_known_fund()
+    r = client.post("/api/holdings/per-fund", json={"holdings": body})
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data["matches"]) == 1
+    assert data["matches"][0]["matched"] is True
+    assert data["matches"][0]["matched_by"] == "isin"
+
+
+def test_overlap_endpoint_happy_path(_live_bundle):
+    body = _holdings_with_one_known_fund()
+    body["assets"].append({
+        "name": "HDFC Flexi Cap Fund - Direct Growth", "asset_type": "mutual_fund",
+        "isin": "INF179K01YV8", "amc": "HDFC", "category": "Equity",
+        "sub_category": "Flexi Cap", "folio": None, "units": 50.0,
+        "invested_value_inr": 500.0, "current_value_inr": 550.0,
+        "xirr_pct": None, "pnl_inr": 50.0, "pnl_pct": 10.0,
+    })
+    r = client.post("/api/holdings/overlap", json={"holdings": body})
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data["funds"]) == 2
+    assert len(data["matrix"]) == 2
+    assert "0_1" in data["shared_stocks_index"]  # PPFAS + HDFC both hold HDFC Bank
+
+
+def test_per_fund_returns_503_when_bundle_missing(monkeypatch, tmp_path):
+    monkeypatch.setattr("amfi.bundle.BUNDLE_PATH", tmp_path / "nope.json")
+    from amfi import bundle
+    bundle._cached = None
+    body = _holdings_with_one_known_fund()
+    r = client.post("/api/holdings/per-fund", json={"holdings": body})
+    assert r.status_code == 503
+    assert "bundle missing" in r.json()["detail"]["error"].lower()

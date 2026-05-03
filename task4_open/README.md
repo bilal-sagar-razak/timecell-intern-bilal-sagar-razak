@@ -6,9 +6,9 @@ overview. Built incrementally across three sub-tasks:
 
 | Sub-task | Status | Tab(s) added |
 |---|---|---|
-| **4a** (this PR) | shipped | Shell + parser + Overview |
-| **4b** (planned) | stubbed | Market + Rebalance (Anthropic agent loop) |
-| **4c** (planned) | stubbed | Holdings + Fund-overlap matrix |
+| **4a** | shipped | Shell + parser + Overview |
+| **4b** | shipped | Market + Rebalance (Anthropic agent loop) |
+| **4c** | shipped | Holdings + Fund-overlap matrix |
 
 ## What 4a ships
 
@@ -119,3 +119,118 @@ Sample data redaction (replacing real names/PANs/phone numbers/Client IDs
 with synthetic values while preserving numeric data verbatim) was an
 explicit decision recorded in the spec — the repo is public on GitHub so
 PII committed once would persist in git history forever.
+
+---
+
+## What 4b ships — Market + Rebalance tabs
+
+- **Market tab.** Nifty 50 trend chart (last 30 days, Recharts area) + a
+  curated headline panel filtered to your portfolio (Google News RSS via
+  `feedparser`, scored by your held tickers/sector keywords).
+- **Rebalance tab.** A Claude Sonnet 4.6 agent loop — given your normalized
+  holdings + a market snapshot, it iterates with three tools
+  (`get_news_for_holding`, `get_nifty_context`, `get_holding_xirr`) until
+  it produces a 3-suggestion rebalance plan. The full tool-call trace is
+  rendered alongside the markdown advice for transparency, so the user can
+  see *why* each suggestion was made (which headlines, which CAGR, which
+  context tokens). Cost ≈$0.05 per run, cached server-side per holdings
+  hash so re-renders are free.
+- **Cache invalidation.** New file upload or `↻ Re-parse` wipes
+  `marketSnapshot`, `rebalanceResult`, `holdingsData`, `overlapData` from
+  the Zustand store so derived results never lag the underlying portfolio.
+
+### What didn't work in 4b
+
+- **Single-shot LLM rebalance prompt** (no tools, all market context
+  jammed into the system prompt) — the model hallucinated returns and
+  invented news headlines. The agent loop with tool grounding fixed both.
+- **Filtering news by fund name** — most Indian mutual funds never appear
+  by name in financial RSS. Updated `get_news_for_holding` to fall back
+  through `name → sub_category → category`, returning a `matched_by`
+  field so the agent knows when "no headlines" means "silent absence",
+  not "opacity risk".
+- **Next.js dev proxy** dropped the long-running rebalance call (~30s)
+  with `ECONNRESET`. The frontend now bypasses the proxy and POSTs
+  directly to `http://localhost:8000` for the agent endpoint; backend
+  added explicit CORS for localhost:3000-3002.
+
+---
+
+## What 4c ships — Holdings + Fund-overlap matrix
+
+- **Holdings tab leads with the matrix.** Symmetric weighted fund-overlap
+  heatmap (CSS grid, brass-shaded by overlap percentage) + a right-hand
+  drilldown panel listing the actual shared stocks when you click any
+  cell. Below the matrix: a sortable per-fund table where each row
+  expands inline to show the fund's underlying holdings.
+- **Two-tier fund matching.** ISIN-first (1.0 confidence), then exact
+  normalized scheme name (0.95), then fuzzy via
+  `max(rapidfuzz.fuzz.ratio, fuzz.token_set_ratio) ≥ 0.85`. Tracked per
+  fund as `matched_by ∈ {isin, name, none}` and surfaced as an inline
+  badge so the user can see which funds were excluded from the matrix.
+- **Symmetric weighted overlap math.** Per pair:
+  `sum over shared stocks of min(weight_in_a, weight_in_b)`. Stocks are
+  aligned by ISIN when present, normalized name otherwise. Output is a
+  full N×N matrix (mirrored for symmetry) plus a `shared_stocks_index`
+  keyed `"i_j"` for `i<j` only.
+- **AMFI bundle.** 28-scheme committed seed at
+  `backend/data/amfi_holdings.json` covers the AMCs that show up most in
+  Indian retail portfolios (PPFAS, HDFC, ICICI Pru, SBI, Quant, Nippon,
+  Bandhan, Tata, Motilal Oswal, Edelweiss, Kotak, Invesco, Canara Robeco).
+  See `backend/data/amfi_coverage.md` for the full scheme list.
+- **Refresh script** (`scripts/refresh_amfi.py`, invoked via
+  `make refresh-amfi`) is wired up with 2 real per-AMC adapters (HDFC,
+  ICICI Pru) + 18 placeholders. The `discover_and_fetch` step is
+  intentionally a `NotImplementedError` stub for v1 — the maintainer
+  downloads each AMC's monthly disclosure manually from
+  https://www.amfiindia.com/online-center/portfolio-disclosure and
+  points the script at the unpacked directory.
+
+### Cost guardrails (zero LLM cost on 4c)
+
+The Holdings tab makes **zero** LLM calls — everything is deterministic
+parsing + math. No per-render cost. The matcher and overlap math run in
+single-digit milliseconds against the in-process indexed bundle.
+
+### What didn't work in 4c
+
+- **Pure `fuzz.token_set_ratio`** (the plan's spec) failed the plan's own
+  test for `"HDFC FlexiCap Fund Direct Plan"` matching `"HDFC Flexi Cap
+  Fund - Direct Growth"` — 81 < 85 threshold. Combined with `fuzz.ratio`
+  (which catches concatenated typos) the score jumps to 97. Documented
+  divergence from the plan, all spec tests pass.
+- **Native `title=""` tooltips** for full fund names on the heatmap labels
+  — browser delay made the cursor-help affordance feel broken. Replaced
+  with Tailwind `group`/`group-hover` CSS tooltips that appear instantly.
+- **Auto-discovery of AMFI's monthly disclosure** ZIP — AMFI's site
+  changes structure occasionally and there's no machine-readable feed.
+  Punted to manual fetch + `make refresh-amfi` for v1; the per-AMC
+  adapters are the actual interesting code.
+
+## AI tool usage (4b + 4c)
+
+Both sub-tasks followed the same `superpowers` chain
+(`brainstorming` → `writing-plans` → `subagent-driven-development`)
+described above for 4a, with the design + plan documents committed under
+`docs/superpowers/specs/` and `docs/superpowers/plans/` respectively.
+
+In **4b**, the highest-risk units (the agent loop, the trace renderer,
+the rebalance markdown parser) were dispatched to fresh subagents with
+two-stage spec + code-quality review. End-to-end browser testing
+uncovered five production bugs that all required real-world fixes:
+HTTP 502 from `tool_result.content` not being a string, missing tool
+schema due to `**kwargs` wrapper, Next.js dev proxy `ECONNRESET` on
+30s+ requests, broken markdown rendering of the agent's preamble +
+trailer, and a race condition where double-clicking the rebalance
+button burned $0.05 twice. All traced to root causes and fixed before
+merge.
+
+In **4c**, only two units went via subagent (the AMFI matcher's
+fuzzy-ranking + ISIN-first ordering, and the overlap math + N×N matrix
+builder) — the remaining 17 tasks are mechanical xlsx/JSON code that
+stayed in the main session per the coalescing strategy. The committed
+seed bundle started at 4 schemes and grew twice during live testing
+against real portfolios — once to 19 schemes when a generic test
+portfolio surfaced 16 unmatched funds, then again to 28 schemes when a
+second test portfolio (Diya Bala) surfaced 7 more. Each expansion was a
+JSON edit + a quick matcher sanity-check script, not a code change.
