@@ -1,4 +1,4 @@
-.PHONY: install install-backend install-frontend dev dev-backend dev-frontend test test-backend test-frontend test-e2e clean
+.PHONY: install install-backend install-frontend dev dev-backend dev-frontend test test-backend test-frontend test-e2e refresh-amfi clean
 
 install: install-backend install-frontend
 
@@ -29,6 +29,9 @@ test-frontend:
 
 test-e2e:
 	cd frontend && npm run test:e2e
+
+refresh-amfi:
+	cd backend && python -m scripts.refresh_amfi
 
 clean:
 	find backend -name __pycache__ -exec rm -rf {} +
