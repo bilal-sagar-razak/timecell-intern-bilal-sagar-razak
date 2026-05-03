@@ -22,16 +22,22 @@ DEFAULT_CACHE_DIR = Path(__file__).parent / "cache"
 
 
 def discover_and_fetch(cache_dir: Path) -> Path:
-    """Discover the latest disclosure URL on amfiindia.com, download per-AMC files
-    into cache_dir, return that directory.
+    """Discover the latest per-AMC disclosure files from AMFI's portfolio-disclosure
+    hub at https://www.amfiindia.com/online-center/portfolio-disclosure, download
+    them into cache_dir, return that directory.
+
+    AMFI links to each AMC's own disclosure file (xls/xlsx/pdf) for the latest
+    month. Format varies per AMC — that's why scripts/amfi_adapters/ has one
+    parser per AMC. Per-scheme PDFs also live at
+    https://portal.amfiindia.com/spages/<scheme_id>.pdf.
 
     Real implementation TBD by maintainer; stub for tests via monkeypatch.
     """
     raise NotImplementedError(
-        "Run `make refresh-amfi` interactively the first time and paste the AMFI "
-        "disclosure ZIP URL. The auto-discovery scraper is intentionally minimal "
-        "for v1 — the maintainer downloads the ZIP manually and points this script "
-        "at the unpacked directory via cache_dir.")
+        "Auto-discovery from amfiindia.com is intentionally deferred for v1. "
+        "The maintainer downloads each AMC's monthly disclosure manually from "
+        "https://www.amfiindia.com/online-center/portfolio-disclosure and "
+        "points this script at the unpacked directory via cache_dir.")
 
 
 def run(bundle_path: Path = DEFAULT_BUNDLE_PATH,
