@@ -36,6 +36,15 @@ If `OPENAI_API_KEY` is missing, the critique step is skipped and the script
 returns the v1 explanation directly. If `ANTHROPIC_API_KEY` is missing, the
 script exits with a clear setup message.
 
+Pass `--no-critique` to skip the OpenAI critique→refine step explicitly —
+useful when the OpenAI key is out of quota or you want a clean recording
+with no critique-related stderr output:
+
+```bash
+python task3_explainer/explain_portfolio.py \
+    --portfolio task3_explainer/sample_portfolio.json --tone beginner --no-critique
+```
+
 ## Acceptance tests (per spec)
 
 - **Happy path:** runs end-to-end on `sample_portfolio.json`; verdict is one of
